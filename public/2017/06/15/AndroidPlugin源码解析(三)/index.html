@@ -1,0 +1,1106 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-max-osx.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="AndroidPlugin," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="上个系列文章留下的taskManager.createTasksForVariantData(tasks, variantData);的分析放到这个系列来进行。 还记得上篇的内容吗？这个方法的具体实现主要分为application和library。 本文将会跳过Instant Run相关代码 由于代码篇幅原因，此篇文章主要是两个taskManager创建Task的步骤。并不包含具体的分析过程，分析">
+<meta name="keywords" content="AndroidPlugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidPlugin源码解析(三)">
+<meta property="og:url" content="http://air.com/2017/06/15/AndroidPlugin源码解析(三)/index.html">
+<meta property="og:site_name" content="Air Little Place">
+<meta property="og:description" content="上个系列文章留下的taskManager.createTasksForVariantData(tasks, variantData);的分析放到这个系列来进行。 还记得上篇的内容吗？这个方法的具体实现主要分为application和library。 本文将会跳过Instant Run相关代码 由于代码篇幅原因，此篇文章主要是两个taskManager创建Task的步骤。并不包含具体的分析过程，分析">
+<meta property="og:updated_time" content="2017-10-08T01:41:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidPlugin源码解析(三)">
+<meta name="twitter:description" content="上个系列文章留下的taskManager.createTasksForVariantData(tasks, variantData);的分析放到这个系列来进行。 还记得上篇的内容吗？这个方法的具体实现主要分为application和library。 本文将会跳过Instant Run相关代码 由于代码篇幅原因，此篇文章主要是两个taskManager创建Task的步骤。并不包含具体的分析过程，分析">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title>AndroidPlugin源码解析(三) | Air Little Place</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-103683322-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Air Little Place</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://air.com/2017/06/15/AndroidPlugin源码解析(三)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Air">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Air Little Place">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AndroidPlugin源码解析(三)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-15T00:00:00+08:00">
+                2017-06-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/06/15/AndroidPlugin源码解析(三)/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/06/15/AndroidPlugin源码解析(三)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上个系列文章留下的<code>taskManager.createTasksForVariantData(tasks, variantData);</code>的分析放到这个系列来进行。</p>
+<p>还记得上篇的内容吗？这个方法的具体实现主要分为application和library。</p>
+<p>本文将会跳过<code>Instant Run</code>相关代码</p>
+<p>由于代码篇幅原因，此篇文章主要是两个taskManager创建Task的步骤。并不包含具体的分析过程，分析过程放在后面几篇文章讲解。</p>
+<p>对比下面的代码可以看出，Application Task和Library Task大部分都是相同的，只有几个方法不同。</p>
+<h3 id="ApplicationTaskManager-createTasksForVariantData"><a href="#ApplicationTaskManager-createTasksForVariantData" class="headerlink" title="ApplicationTaskManager createTasksForVariantData"></a>ApplicationTaskManager createTasksForVariantData</h3><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div><div class="line">259</div><div class="line">260</div><div class="line">261</div><div class="line">262</div><div class="line">263</div><div class="line">264</div><div class="line">265</div><div class="line">266</div><div class="line">267</div><div class="line">268</div><div class="line">269</div><div class="line">270</div><div class="line">271</div><div class="line">272</div><div class="line">273</div><div class="line">274</div><div class="line">275</div><div class="line">276</div><div class="line">277</div><div class="line">278</div><div class="line">279</div><div class="line">280</div><div class="line">281</div><div class="line">282</div><div class="line">283</div><div class="line">284</div><div class="line">285</div><div class="line">286</div><div class="line">287</div><div class="line">288</div><div class="line">289</div><div class="line">290</div><div class="line">291</div><div class="line">292</div><div class="line">293</div><div class="line">294</div><div class="line">295</div><div class="line">296</div><div class="line">297</div><div class="line">298</div><div class="line">299</div><div class="line">300</div><div class="line">301</div><div class="line">302</div><div class="line">303</div><div class="line">304</div><div class="line">305</div><div class="line">306</div><div class="line">307</div><div class="line">308</div><div class="line">309</div><div class="line">310</div><div class="line">311</div><div class="line">312</div><div class="line">313</div><div class="line">314</div><div class="line">315</div><div class="line">316</div><div class="line">317</div><div class="line">318</div><div class="line">319</div><div class="line">320</div><div class="line">321</div><div class="line">322</div><div class="line">323</div><div class="line">324</div><div class="line">325</div><div class="line">326</div><div class="line">327</div><div class="line">328</div><div class="line">329</div><div class="line">330</div><div class="line">331</div><div class="line">332</div><div class="line">333</div><div class="line">334</div><div class="line">335</div><div class="line">336</div><div class="line">337</div><div class="line">338</div><div class="line">339</div><div class="line">340</div><div class="line">341</div><div class="line">342</div><div class="line">343</div><div class="line">344</div><div class="line">345</div><div class="line">346</div><div class="line">347</div><div class="line">348</div><div class="line">349</div><div class="line">350</div><div class="line">351</div><div class="line">352</div><div class="line">353</div><div class="line">354</div><div class="line">355</div><div class="line">356</div><div class="line">357</div><div class="line">358</div><div class="line">359</div><div class="line">360</div><div class="line">361</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void createTasksForVariantData(</div><div class="line">        @NonNull final TaskFactory tasks,</div><div class="line">        @NonNull final BaseVariantData&lt;? extends BaseVariantOutputData&gt; variantData) &#123;</div><div class="line">    assert variantData instanceof ApplicationVariantData;</div><div class="line">    final String projectPath = project.getPath();</div><div class="line">    final String variantName = variantData.getName();</div><div class="line">    final VariantScope variantScope = variantData.getScope();</div><div class="line"></div><div class="line">    createAnchorTasks(tasks, variantScope);</div><div class="line"></div><div class="line">    createCheckManifestTask(tasks, variantScope);</div><div class="line">    //...</div><div class="line">    //有一些和手表相关的Tasks创建过程</div><div class="line">    //...</div><div class="line">    // Create all current streams (dependencies mostly at this point)</div><div class="line">    createDependencyStreams(tasks, variantScope);</div><div class="line">    // Add a task to process the manifest(s)</div><div class="line">    createMergeAppManifestsTask(tasks, variantScope);</div><div class="line">    // Add a task to create the res values</div><div class="line">    createGenerateResValuesTask(tasks, variantScope);</div><div class="line">    // Add a task to compile renderscript files.</div><div class="line">    createRenderscriptTask(tasks, variantScope);</div><div class="line">    // Add a task to merge the resource folders</div><div class="line">    createMergeResourcesTask(tasks, variantScope);</div><div class="line">    // Add a task to merge the asset folders</div><div class="line">    createMergeAssetsTask(tasks, variantScope);</div><div class="line">    // Add a task to create the BuildConfig class</div><div class="line">    createBuildConfigTask(tasks, variantScope);</div><div class="line">    // Add a task to process the Android Resources and generate source files</div><div class="line">    createApkProcessResTask(tasks, variantScope);</div><div class="line">    // Add a task to process the java resources</div><div class="line">    createProcessJavaResTasks(tasks, variantScope);</div><div class="line">    // Add a task to process the Aidl</div><div class="line">    createAidlTask(tasks, variantScope);</div><div class="line">    createShaderTask(tasks, variantScope);</div><div class="line">    // Add NDK tasks</div><div class="line">    if (!isComponentModelPlugin) &#123;</div><div class="line">         createNdkTasks(variantScope);</div><div class="line">    &#125; else &#123;</div><div class="line">        if (variantData.compileTask != null) &#123;</div><div class="line">            variantData.compileTask.dependsOn(getNdkBuildable(variantData));</div><div class="line">        &#125; else &#123;</div><div class="line">            variantScope.getCompileTask().dependsOn(tasks, getNdkBuildable(variantData));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    variantScope.setNdkBuildable(getNdkBuildable(variantData));</div><div class="line">    // Add external native build tasks</div><div class="line">    createExternalNativeBuildJsonGenerators(variantScope);</div><div class="line">    createExternalNativeBuildTasks(tasks, variantScope);</div><div class="line">    // Add a task to merge the jni libs folders</div><div class="line">    createMergeJniLibFoldersTasks(tasks, variantScope);</div><div class="line"></div><div class="line">    // Add a compile task</div><div class="line">    CoreJackOptions jackOptions =</div><div class="line">               variantData.getVariantConfiguration().getJackOptions();</div><div class="line">    AndroidTask&lt;? extends JavaCompile&gt; javacTask =</div><div class="line">            createJavacTask(tasks, variantScope);</div><div class="line">    if (jackOptions.isEnabled()) &#123;</div><div class="line">        AndroidTask&lt;TransformTask&gt; jackTask =</div><div class="line">                createJackTask(tasks, variantScope, true /*compileJavaSource*/);</div><div class="line">        setJavaCompilerTask(jackTask, tasks, variantScope);</div><div class="line">    &#125; else &#123;</div><div class="line">        // Prevent the use of java 1.8 without jack, which would otherwise cause an</div><div class="line">        // internal javac error.</div><div class="line">        if(variantScope.getGlobalScope().getExtension().getCompileOptions()</div><div class="line">                .getTargetCompatibility().isJava8Compatible()) &#123;</div><div class="line">            // Only warn for users of retrolambda and dexguard</div><div class="line">            if (project.getPlugins().hasPlugin("me.tatarka.retrolambda")</div><div class="line">                    || project.getPlugins().hasPlugin("dexguard")) &#123;</div><div class="line">                getLogger().warn("Jack is disabled, but one of the plugins you "</div><div class="line">                        + "are using supports Java 8 language features.");</div><div class="line">            &#125; else &#123;</div><div class="line">                androidBuilder.getErrorReporter().handleSyncError(</div><div class="line">                        variantScope.getVariantConfiguration().getFullName(),</div><div class="line">                        SyncIssue.TYPE_JACK_REQUIRED_FOR_JAVA_8_LANGUAGE_FEATURES,</div><div class="line">                        "Jack is required to support java 8 language features. "</div><div class="line">                                + "Either enable Jack or remove "</div><div class="line">                                + "sourceCompatibility JavaVersion.VERSION_1_8."</div><div class="line">                );</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        addJavacClassesStream(variantScope);</div><div class="line">        setJavaCompilerTask(javacTask, tasks, variantScope);</div><div class="line">        getAndroidTasks().create(tasks,</div><div class="line">                new AndroidJarTask.JarClassesConfigAction(variantScope));</div><div class="line">        createPostCompilationTasks(tasks, variantScope);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Add data binding tasks if enabled</div><div class="line">    if (extension.getDataBinding().isEnabled()) &#123;</div><div class="line">        createDataBindingTasks(tasks, variantScope);</div><div class="line">    &#125;</div><div class="line">    createStripNativeLibraryTask(tasks, variantScope);</div><div class="line">    if (variantData.getSplitHandlingPolicy().equals(</div><div class="line">            SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY)) &#123;</div><div class="line">        if (getExtension().getBuildToolsRevision().getMajor() &lt; 21) &#123;</div><div class="line">            throw new RuntimeException("Pure splits can only be used with buildtools 21 and later");</div><div class="line">        &#125;</div><div class="line">        createSplitTasks(tasks, variantScope);</div><div class="line">    &#125;</div><div class="line">    @Nullable AndroidTask&lt;InstantRunWrapperTask&gt; fullBuildInfoGeneratorTask</div><div class="line">                            = createInstantRunPackagingTasks(tasks, variantScope);</div><div class="line">    createPackagingTask(tasks, variantScope, true /*publishApk*/, fullBuildInfoGeneratorTask);</div><div class="line">    // create the lint tasks.</div><div class="line">    createLintTasks(tasks, variantScope);</div><div class="line">&#125;</div><div class="line">~~~     </div><div class="line"></div><div class="line">### LibraryTaskManager createTasksForVariantData</div><div class="line"></div><div class="line">~~~ java</div><div class="line">@Override</div><div class="line">public void createTasksForVariantData(</div><div class="line">        @NonNull final TaskFactory tasks,</div><div class="line">        @NonNull final BaseVariantData&lt;? extends BaseVariantOutputData&gt; variantData) &#123;</div><div class="line">    final boolean generateSourcesOnly = AndroidGradleOptions.generateSourcesOnly(project);</div><div class="line">    final LibraryVariantData libVariantData = (LibraryVariantData) variantData;</div><div class="line">    final GradleVariantConfiguration variantConfig = variantData.getVariantConfiguration();</div><div class="line">    final CoreBuildType buildType = variantConfig.getBuildType();</div><div class="line">    final VariantScope variantScope = variantData.getScope();</div><div class="line">    GlobalScope globalScope = variantScope.getGlobalScope();</div><div class="line">    final File intermediatesDir = globalScope.getIntermediatesDir();</div><div class="line">    final Collection&lt;String&gt; variantDirectorySegments = variantConfig.getDirectorySegments();</div><div class="line">    final File variantBundleDir = variantScope.getBaseBundleDir();</div><div class="line">    final String projectPath = project.getPath();</div><div class="line">    final String variantName = variantData.getName();</div><div class="line">    // 创建一些preXXXBuild任务，generateXXXResources/Assets/Sources任务以及</div><div class="line">    // compileXXXSources任务</div><div class="line">    createAnchorTasks(tasks, variantScope);</div><div class="line">    // Create all current streams (dependencies mostly at this point)</div><div class="line">    createDependencyStreams(tasks, variantScope);</div><div class="line">    // checkXXXManifest</div><div class="line">    createCheckManifestTask(tasks, variantScope);</div><div class="line">    // Add a task to create the res values</div><div class="line">    createGenerateResValuesTask(tasks, variantScope);</div><div class="line">    // Add a task to process the manifest(s)</div><div class="line">    createMergeLibManifestsTask(tasks, variantScope);</div><div class="line">    // Add a task to compile renderscript files.</div><div class="line">    createRenderscriptTask(tasks, variantScope);</div><div class="line">    AndroidTask&lt;MergeResources&gt; packageRes = basicCreateMergeResourcesTask(</div><div class="line">                                    tasks,</div><div class="line">                                    variantScope,</div><div class="line">                                    "package",</div><div class="line">                                    FileUtils.join(variantBundleDir, "res"),</div><div class="line">                                    false /*includeDependencies*/,</div><div class="line">                                    false /*process9Patch*/);</div><div class="line">     if (variantData.getVariantDependency().hasNonOptionalLibraries()) &#123;</div><div class="line">         // Add a task to merge the resource folders, including the libraries, in order to</div><div class="line">         // generate the R.txt file with all the symbols, including the ones from</div><div class="line">         // the dependencies.</div><div class="line">         createMergeResourcesTask(</div><div class="line">                 tasks,</div><div class="line">                 variantScope,</div><div class="line">                 false /*process9patch*/);</div><div class="line">     &#125;</div><div class="line">     packageRes.configure(tasks,</div><div class="line">             new Action&lt;Task&gt;() &#123;</div><div class="line">                 @Override</div><div class="line">                 public void execute(Task task) &#123;</div><div class="line">                     MergeResources mergeResourcesTask = (MergeResources) task;</div><div class="line">                     mergeResourcesTask.setPublicFile(FileUtils.join(</div><div class="line">                             variantBundleDir,</div><div class="line">                             SdkConstants.FN_PUBLIC_TXT // public.txt</div><div class="line">                     ));</div><div class="line">                 &#125;</div><div class="line">             &#125;);</div><div class="line">    // Add a task to merge the assets folders</div><div class="line">    createMergeAssetsTask(tasks, variantScope);</div><div class="line">    // Add a task to create the BuildConfig class</div><div class="line">    createBuildConfigTask(tasks, variantScope);</div><div class="line">    // Add a task to process Res</div><div class="line">    createProcessResTask(tasks, variantScope, variantBundleDir,</div><div class="line">                            false /*generateResourcePackage*/);</div><div class="line">    // process java resources</div><div class="line">    createProcessJavaResTasks(tasks, variantScope);</div><div class="line">    // Add a task to process Aidl</div><div class="line">    createAidlTask(tasks, variantScope);</div><div class="line">    createShaderTask(tasks, variantScope);</div><div class="line">    // Add a compile task</div><div class="line">    AndroidTask&lt;? extends JavaCompile&gt; javacTask =</div><div class="line">                            createJavacTask(tasks, variantScope);</div><div class="line">    addJavacClassesStream(variantScope);</div><div class="line">    TaskManager.setJavaCompilerTask(javacTask, tasks, variantScope);</div><div class="line">    // Add data binding tasks if enabled</div><div class="line">    if (extension.getDataBinding().isEnabled()) &#123;</div><div class="line">        createDataBindingTasks(tasks, variantScope);</div><div class="line">    &#125;</div><div class="line">    // Add dependencies on NDK tasks if NDK plugin is applied.</div><div class="line">    if (!isComponentModelPlugin) &#123;</div><div class="line">        // Add NDK tasks</div><div class="line">        createNdkTasks(variantScope);</div><div class="line">    &#125;</div><div class="line">    variantScope.setNdkBuildable(getNdkBuildable(variantData));</div><div class="line">    // External native build</div><div class="line">    createExternalNativeBuildJsonGenerators(variantScope);</div><div class="line">    createExternalNativeBuildTasks(tasks, variantScope);</div><div class="line">    // merge jni libs.</div><div class="line">    createMergeJniLibFoldersTasks(tasks, variantScope);</div><div class="line">    Sync packageRenderscript = project.getTasks().create(</div><div class="line">             variantScope.getTaskName("package", "Renderscript"), Sync.class);</div><div class="line">     // package from 3 sources. the order is important to make sure the override works well.</div><div class="line">     packageRenderscript.from(variantConfig.getRenderscriptSourceList())</div><div class="line">             .include("**/*.rsh");</div><div class="line">     packageRenderscript.into(new File(variantBundleDir, FD_RENDERSCRIPT));</div><div class="line">    // merge consumer proguard files from different build types and flavors</div><div class="line">    MergeFileTask mergeProGuardFileTask = project.getTasks().create(</div><div class="line">            variantScope.getTaskName("merge", "ProguardFiles"),</div><div class="line">            MergeFileTask.class);</div><div class="line">    mergeProGuardFileTask.setVariantName(variantConfig.getFullName());</div><div class="line">    mergeProGuardFileTask.setInputFiles(</div><div class="line">            project.files(variantConfig.getConsumerProguardFiles())</div><div class="line">                    .getFiles());</div><div class="line">    mergeProGuardFileTask.setOutputFile(</div><div class="line">            new File(variantBundleDir, FN_PROGUARD_TXT));</div><div class="line">    // copy lint.jar into the bundle folder</div><div class="line">    Copy lintCopy = project.getTasks().create(</div><div class="line">            variantScope.getTaskName("copy", "Lint"), Copy.class);</div><div class="line">    lintCopy.dependsOn(LINT_COMPILE);</div><div class="line">    lintCopy.from(new File(</div><div class="line">            globalScope.getIntermediatesDir(),</div><div class="line">            "lint/lint.jar"));</div><div class="line">    lintCopy.into(variantBundleDir);</div><div class="line">    final Zip bundle = project.getTasks().create(variantScope.getTaskName("bundle"), Zip.class);</div><div class="line">    if (variantData.getVariantDependency().isAnnotationsPresent()) &#123;</div><div class="line">        libVariantData.generateAnnotationsTask =</div><div class="line">                createExtractAnnotations(project, variantData);</div><div class="line">    &#125;</div><div class="line">    if (libVariantData.generateAnnotationsTask != null &amp;&amp; !generateSourcesOnly) &#123;</div><div class="line">        bundle.dependsOn(libVariantData.generateAnnotationsTask);</div><div class="line">    &#125;</div><div class="line">    final boolean instrumented = variantConfig.getBuildType().isTestCoverageEnabled();</div><div class="line">    TransformManager transformManager = variantScope.getTransformManager();</div><div class="line">    // ----- Code Coverage first -----</div><div class="line">    if (instrumented) &#123;</div><div class="line">        createJacocoTransform(tasks, variantScope);</div><div class="line">    &#125;</div><div class="line">    // ----- External Transforms -----</div><div class="line">    // apply all the external transforms.</div><div class="line">    List&lt;Transform&gt; customTransforms = extension.getTransforms();</div><div class="line">    // 插件中Transform任务</div><div class="line">    List&lt;List&lt;Object&gt;&gt; customTransformsDependencies =</div><div class="line">        extension.getTransformsDependencies();</div><div class="line">    for (int i = 0, count = customTransforms.size() ; i &lt; count ; i++) &#123;</div><div class="line">        Transform transform = customTransforms.get(i);</div><div class="line">        // Check the transform only applies to supported scopes for libraries:</div><div class="line">        // We cannot transform scopes that are not packaged in the library</div><div class="line">        // itself.</div><div class="line">        Sets.SetView&lt;Scope&gt; difference = Sets.difference(transform.getScopes(),</div><div class="line">                TransformManager.SCOPE_FULL_LIBRARY);</div><div class="line">        if (!difference.isEmpty()) &#123;</div><div class="line">            String scopes = difference.toString();</div><div class="line">            androidBuilder.getErrorReporter().handleSyncError(</div><div class="line">                    "",</div><div class="line">                    SyncIssue.TYPE_GENERIC,</div><div class="line">                    String.format("Transforms with scopes '%s' cannot be applied to library projects.",</div><div class="line">                            scopes));</div><div class="line">        &#125;</div><div class="line">        AndroidTask&lt;TransformTask&gt; task = transformManager</div><div class="line">                .addTransform(tasks, variantScope, transform);</div><div class="line">        if (task != null) &#123;</div><div class="line">            List&lt;Object&gt; deps = customTransformsDependencies.get(i);</div><div class="line">            if (!deps.isEmpty()) &#123;</div><div class="line">                task.dependsOn(tasks, deps);</div><div class="line">            &#125;</div><div class="line">            // if the task is a no-op then we make assemble task depend on it.</div><div class="line">            if (transform.getScopes().isEmpty()) &#123;</div><div class="line">                variantScope.getAssembleTask().dependsOn(tasks, task);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // ----- Minify next -----</div><div class="line">    if (buildType.isMinifyEnabled()) &#123;</div><div class="line">        createMinifyTransform(tasks, variantScope, false);</div><div class="line">    &#125;</div><div class="line">    // now add a transform that will take all the class/res and package them</div><div class="line">    // into the main and secondary jar files.</div><div class="line">    // This transform technically does not use its transform output, butthat's</div><div class="line">    // ok. We use the transform mechanism to get incremental data from</div><div class="line">    // the streams.</div><div class="line">    String packageName = variantConfig.getPackageFromManifest();</div><div class="line">    if (packageName == null) &#123;</div><div class="line">        throw new BuildException("Failed to read manifest", null);</div><div class="line">    &#125;</div><div class="line">    LibraryJarTransform transform = new LibraryJarTransform(</div><div class="line">            new File(variantBundleDir, FN_CLASSES_JAR),</div><div class="line">            new File(variantBundleDir, LIBS_FOLDER),</div><div class="line">            variantScope.getTypedefFile(),</div><div class="line">            packageName,</div><div class="line">            getExtension().getPackageBuildConfig());</div><div class="line">    excludeDataBindingClassesIfNecessary(variantScope, transform);</div><div class="line">    AndroidTask&lt;TransformTask&gt; jarPackagingTask = transformManager</div><div class="line">            .addTransform(tasks, variantScope, transform);</div><div class="line">    if (!generateSourcesOnly) &#123;</div><div class="line">        bundle.dependsOn(jarPackagingTask.getName());</div><div class="line">    &#125;</div><div class="line">    // now add a transform that will take all the native libs and package</div><div class="line">    // them into the libs folder of the bundle.</div><div class="line">    LibraryJniLibsTransform jniTransform = new LibraryJniLibsTransform(</div><div class="line">            new File(variantBundleDir, FD_JNI));</div><div class="line">    AndroidTask&lt;TransformTask&gt; jniPackagingTask = transformManager</div><div class="line">            .addTransform(tasks, variantScope, jniTransform);</div><div class="line">    if (!generateSourcesOnly) &#123;</div><div class="line">        bundle.dependsOn(jniPackagingTask.getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    bundle.dependsOn(</div><div class="line">        packageRes.getName(),</div><div class="line">        packageRenderscript,</div><div class="line">        lintCopy,</div><div class="line">        mergeProGuardFileTask,</div><div class="line">        // The below dependencies are redundant in a normal build as</div><div class="line">        // generateSources depends on them. When generateSourcesOnly iinjected they are</div><div class="line">        // needed explicitly, as bundle no longer depends on compileJava</div><div class="line">        variantScope.getAidlCompileTask().getName(),</div><div class="line">        variantScope.getMergeAssetsTask().getName(),</div><div class="line">        variantData.getOutputs().get(0).getScope().getManifestProcessorTask.getName());</div><div class="line">    if (!generateSourcesOnly) &#123;</div><div class="line">        bundle.dependsOn(variantScope.getNdkBuildable());</div><div class="line">    &#125;</div><div class="line">    bundle.setDescription("Assembles a bundle containing the library in " +</div><div class="line">            variantConfig.getFullName() + ".");</div><div class="line">    bundle.setDestinationDir(</div><div class="line">            new File(globalScope.getOutputsDir(), BuilderConstants.EXT_LIB_ARCHIVE));</div><div class="line">    bundle.setArchiveName(globalScope.getProjectBaseName()</div><div class="line">            + "-" + variantConfig.getBaseName()</div><div class="line">            + "." + BuilderConstants.EXT_LIB_ARCHIVE);</div><div class="line">    bundle.setExtension(BuilderConstants.EXT_LIB_ARCHIVE);</div><div class="line">    bundle.from(variantBundleDir);</div><div class="line">    bundle.from(FileUtils.join(intermediatesDir,</div><div class="line">            StringHelper.toStrings(ANNOTATIONS, variantDirectorySegments)));</div><div class="line">    // get the single output for now, though that may always be the case for a library.</div><div class="line">    LibVariantOutputData variantOutputData = libVariantData.getOutputs().get(0);</div><div class="line">    variantOutputData.packageLibTask = bundle;</div><div class="line">    variantScope.getAssembleTask().dependsOn(tasks, bundle);</div><div class="line">    variantOutputData.getScope().setAssembleTask(variantScope.getAssembleTask());</div><div class="line">    variantOutputData.assembleTask = variantData.assembleVariantTask;</div><div class="line">    if (getExtension().getDefaultPublishConfig().equals(variantConfig.getFullName())) &#123;</div><div class="line">        VariantHelper.setupDefaultConfig(project,</div><div class="line">                variantData.getVariantDependency().getPackageConfiguration());</div><div class="line">        // add the artifact that will be published</div><div class="line">        project.getArtifacts().add("default", bundle);</div><div class="line">        getAssembleDefault().dependsOn(variantScope.getAssembleTask().getName());</div><div class="line">    &#125;</div><div class="line">    // also publish the artifact with its full config name</div><div class="line">    if (getExtension().getPublishNonDefault()) &#123;</div><div class="line">        project.getArtifacts().add(</div><div class="line">                variantData.getVariantDependency().getPublishConfiguration().getName(), bundle);</div><div class="line">        bundle.setClassifier(</div><div class="line">                variantData.getVariantDependency().getPublishConfiguration().getName());</div><div class="line">    &#125;</div><div class="line">    // configure the variant to be testable.</div><div class="line">    variantConfig.setOutput(new LocalTestedAarLibrary(</div><div class="line">            bundle.getArchivePath(),</div><div class="line">            variantBundleDir,</div><div class="line">            variantData.getName(),</div><div class="line">            project.getPath(),</div><div class="line">            variantData.getName(),</div><div class="line">            false /*isProvided*/));</div><div class="line">   createLintTasks(tasks, variantScope);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AndroidPlugin/" rel="tag"># AndroidPlugin</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/31/AndroidPlugin源码解析(二)/" rel="next" title="AndroidPlugin源码解析(二)">
+                <i class="fa fa-chevron-left"></i> AndroidPlugin源码解析(二)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/30/AndroidPlugin源码解析(四)/" rel="prev" title="AndroidPlugin源码解析(四)">
+                AndroidPlugin源码解析(四) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Air" />
+          <p class="site-author-name" itemprop="name">Air</p>
+           
+              <p class="site-description motion-element" itemprop="description">Write Something I Want</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yunair" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#ApplicationTaskManager-createTasksForVariantData"><span class="nav-number">1.</span> <span class="nav-text">ApplicationTaskManager createTasksForVariantData</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Air</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://yunair.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://air.com/2017/06/15/AndroidPlugin源码解析(三)/';
+          this.page.identifier = '2017/06/15/AndroidPlugin源码解析(三)/';
+          this.page.title = 'AndroidPlugin源码解析(三)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://yunair.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -112,7 +112,7 @@ scope.getResourceGenTask().dependsOn(tasks, generateResValuesTask);
 原来，是我们在AS中点击sync的时候触发的，这个时候会执行`[:app:generateDebugSources]`，这样就触发了`scope.getSourceGenTask()`，因为它依赖`generateBuildConfigTask`，所以这个时候也会生成我们最终使用的`BuildConfig.java`文件，也会检测`Manifest`的合法性
 
 
-这样，我们就可以通过调用`installTask`，让这个Task帮我们调用所有它依赖的Task，来完成整个Apk的打包签名安装工作，
+所以，我们可以通过调用`installTask`，让这个Task帮我们调用所有它依赖的Task，来完成整个Apk的打包签名安装工作，
 不过AS的gradle并不是只调用`installTask`而已，我觉得应该在`installTask`中途做了一个hook，加入了GUI，否则正常调用`installTask`的话，不会出现那个选择安装到哪个手机的对话框的。
 
 这样我们整个打包流程点和面都齐全了，这个系列的文章暂时就告一段落了，接下来有空会选择填前面文章中留下的坑，比如`classes如何变成dex的`，`aapt是如何处理那些资源的`等...

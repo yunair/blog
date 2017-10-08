@@ -1,0 +1,1167 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-max-osx.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="AndroidPlugin," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="上篇提到，我们这篇研究的是接下来三个过程, 分别是:  createBuildConfigTask createApkProcessResTask createProcessJavaResTasks  接下来，我们一个一个来看 createBuildConfigTask这个task实际执行如下方法: 1234567891011121314151617181920212223242526272829">
+<meta name="keywords" content="AndroidPlugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidPlugin源码解析(六)">
+<meta property="og:url" content="http://air.com/2017/08/15/AndroidPlugin源码解析(六)/index.html">
+<meta property="og:site_name" content="Air Little Place">
+<meta property="og:description" content="上篇提到，我们这篇研究的是接下来三个过程, 分别是:  createBuildConfigTask createApkProcessResTask createProcessJavaResTasks  接下来，我们一个一个来看 createBuildConfigTask这个task实际执行如下方法: 1234567891011121314151617181920212223242526272829">
+<meta property="og:updated_time" content="2017-10-08T01:43:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidPlugin源码解析(六)">
+<meta name="twitter:description" content="上篇提到，我们这篇研究的是接下来三个过程, 分别是:  createBuildConfigTask createApkProcessResTask createProcessJavaResTasks  接下来，我们一个一个来看 createBuildConfigTask这个task实际执行如下方法: 1234567891011121314151617181920212223242526272829">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title>AndroidPlugin源码解析(六) | Air Little Place</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-103683322-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Air Little Place</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://air.com/2017/08/15/AndroidPlugin源码解析(六)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Air">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Air Little Place">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AndroidPlugin源码解析(六)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-15T00:00:00+08:00">
+                2017-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/08/15/AndroidPlugin源码解析(六)/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/08/15/AndroidPlugin源码解析(六)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上篇提到，我们这篇研究的是接下来三个过程, 分别是:</p>
+<ul>
+<li>createBuildConfigTask</li>
+<li>createApkProcessResTask</li>
+<li>createProcessJavaResTasks</li>
+</ul>
+<p>接下来，我们一个一个来看</p>
+<h3 id="createBuildConfigTask"><a href="#createBuildConfigTask" class="headerlink" title="createBuildConfigTask"></a>createBuildConfigTask</h3><p>这个task实际执行如下方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// must clear the folder in case the packagename changed, otherwise,</span></div><div class="line"><span class="comment">// there'll be two classes.</span></div><div class="line">File destinationDir = getSourceOutputDir();</div><div class="line">FileUtils.cleanOutputDir(destinationDir);</div><div class="line"></div><div class="line">BuildConfigGenerator generator = <span class="keyword">new</span> BuildConfigGenerator(</div><div class="line">       getSourceOutputDir(),</div><div class="line">       getBuildConfigPackageName());</div><div class="line"></div><div class="line"><span class="comment">// Hack (see IDEA-100046): We want to avoid reporting "condition is always true"</span></div><div class="line"><span class="comment">// from the data flow inspection, so use a non-constant value. However, that defeats</span></div><div class="line"><span class="comment">// the purpose of this flag (when not in debug mode, if (BuildConfig.DEBUG &amp;&amp; ...) will</span></div><div class="line"><span class="comment">// be completely removed by the compiler), so as a hack we do it only for the case</span></div><div class="line"><span class="comment">// where debug is true, which is the most likely scenario while the user is looking</span></div><div class="line"><span class="comment">// at source code.</span></div><div class="line"><span class="comment">//map.put(PH_DEBUG, Boolean.toString(mDebug));</span></div><div class="line">generator.addField(<span class="string">"boolean"</span>, <span class="string">"DEBUG"</span>,</div><div class="line">       isDebuggable() ? <span class="string">"Boolean.parseBoolean(\"true\")"</span> : <span class="string">"false"</span>)</div><div class="line">       .addField(<span class="string">"String"</span>, <span class="string">"APPLICATION_ID"</span>, <span class="string">'"'</span> + getAppPackageName() + <span class="string">'"'</span>)</div><div class="line">       .addField(<span class="string">"String"</span>, <span class="string">"BUILD_TYPE"</span>, <span class="string">'"'</span> + getBuildTypeName() + <span class="string">'"'</span>)</div><div class="line">       .addField(<span class="string">"String"</span>, <span class="string">"FLAVOR"</span>, <span class="string">'"'</span> + getFlavorName() + <span class="string">'"'</span>)</div><div class="line">       .addField(<span class="string">"int"</span>, <span class="string">"VERSION_CODE"</span>, Integer.toString(getVersionCode()))</div><div class="line">       .addField(<span class="string">"String"</span>, <span class="string">"VERSION_NAME"</span>, <span class="string">'"'</span> + Strings.nullToEmpty(getVersionName()) + <span class="string">'"'</span>)</div><div class="line">       .addItems(getItems());</div><div class="line"></div><div class="line">List&lt;String&gt; flavors = getFlavorNamesWithDimensionNames();</div><div class="line"><span class="keyword">int</span> count = flavors.size();</div><div class="line"><span class="keyword">if</span> (count &gt; <span class="number">1</span>) &#123;</div><div class="line">   <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i += <span class="number">2</span>) &#123;</div><div class="line">       generator.addField(</div><div class="line">               <span class="string">"String"</span>, <span class="string">"FLAVOR_"</span> + flavors.get(i + <span class="number">1</span>), <span class="string">'"'</span> + flavors.get(i) + <span class="string">'"'</span>);</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">generator.generate();</div></pre></td></tr></table></figure>
+<p>这个方法的结果是<code>build/generated/source/${buildTypes}/${packageName}</code>目录下生成<code>BuildConfig.java</code>文件。这个我相信大家都很熟悉了。</p>
+<p>我们可以看到, 即使我们在build.gradle中不填任何<code>buildConfigField</code>，也会生成这样一个文件，这个文件里的内容一定有<br>DEBUG, APPLICATION_ID, BUILD_TYPE, FLAVOR, VERSION_CODE, VERSION_NAME字段。</p>
+<p>DEBUG这个字段是由isDebuggable这个方法决定的。也就是我们平时会在debug{}或者release{}中写的<code>debuggable true</code>。<br><br></p>
+<p><code>getItems</code>不用说，就是把我们用<code>buildConfigField</code>声明的参数转化为<code>Field</code>。</p>
+<p>最后的<code>generate</code>方法就不看具体实现了，就是按照Java文件格式，将这些内容写入<code>BuildConfig.java</code>文件中。<br><br></p>
+<p>好了，这个<code>BuildConfigTask</code>到这里就分析完成了。<br><br></p>
+<p>我们来看下一个方法</p>
+<h3 id="createApkProcessResTask"><a href="#createApkProcessResTask" class="headerlink" title="createApkProcessResTask"></a>createApkProcessResTask</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// we have to clean the source folder output in case the package name changed.</span></div><div class="line">File srcOut = getSourceOutputDir();</div><div class="line"><span class="keyword">if</span> (srcOut != <span class="keyword">null</span>) &#123;</div><div class="line">    FileUtils.cleanOutputDir(srcOut);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="meta">@Nullable</span></div><div class="line"><span class="comment">// 对于application来说，这个文件是`build/intermediates/res/resources-$&#123;buildType&#125;.ap_</span></div><div class="line"><span class="comment">// 对于library来说，为null</span></div><div class="line"><span class="comment">// 这个是aapt执行完成后输出的压缩文件，里面包含了所有资源文件，和最终的`resources.arsc`</span></div><div class="line">File resOutBaseNameFile = getPackageOutputFile();</div><div class="line"></div><div class="line">File manifestFileToPackage = getManifestFile();</div><div class="line"></div><div class="line">AndroidBuilder builder = getBuilder();</div><div class="line">MergingLog mergingLog = <span class="keyword">new</span> MergingLog(getMergeBlameLogFolder());</div><div class="line">ProcessOutputHandler processOutputHandler = <span class="keyword">new</span> ParsingProcessOutputHandler(</div><div class="line">        <span class="keyword">new</span> ToolOutputParser(<span class="keyword">new</span> AaptOutputParser(), getILogger()), <span class="comment">// 处理执行完的log</span></div><div class="line">        <span class="keyword">new</span> MergingLogRewriter(mergingLog, builder.getErrorReporter()));</div><div class="line">        <span class="comment">// merge后的log位于 </span></div><div class="line">        <span class="comment">// build/intermediates/blame/res/$&#123;buildConfig&#125;/</span></div><div class="line"></div><div class="line"><span class="comment">// 生成对应的Aapt对象</span></div><div class="line">Aapt aapt = AaptGradleFactory.make(</div><div class="line">        getBuilder(),</div><div class="line">        processOutputHandler,</div><div class="line">        <span class="keyword">true</span>,</div><div class="line">        <span class="keyword">true</span>,</div><div class="line">        variantScope.getGlobalScope().getProject(),</div><div class="line">        variantScope.getVariantConfiguration().getType(),</div><div class="line">        FileUtils.mkdirs(<span class="keyword">new</span> File(getIncrementalFolder(), <span class="string">"aapt-temp"</span>)),</div><div class="line">        aaptOptions.getCruncherProcesses());</div><div class="line"><span class="comment">// 给Aapt设置参数</span></div><div class="line">AaptPackageConfig.Builder config = <span class="keyword">new</span> AaptPackageConfig.Builder()</div><div class="line">        .setManifestFile(manifestFileToPackage)</div><div class="line">        .setOptions(getAaptOptions())</div><div class="line">        .setResourceDir(getResDir())</div><div class="line">        .setLibraries(getLibraries())</div><div class="line">        .setCustomPackageForR(getPackageForR())</div><div class="line">        .setSymbolOutputDir(getTextSymbolOutputDir())</div><div class="line">        .setSourceOutputDir(srcOut)</div><div class="line">        .setResourceOutputApk(resOutBaseNameFile)</div><div class="line">        .setProguardOutputFile(getProguardOutputFile())</div><div class="line">        .setMainDexListProguardOutputFile(getMainDexListProguardOutputFile())</div><div class="line">        .setVariantType(getType())</div><div class="line">        .setDebuggable(getDebuggable())</div><div class="line">        .setPseudoLocalize(getPseudoLocalesEnabled())</div><div class="line">        .setResourceConfigs(getResourceConfigs())</div><div class="line">        .setSplits(getSplits())</div><div class="line">        .setPreferredDensity(getPreferredDensity());</div><div class="line"></div><div class="line">builder.processResources(aapt, config, getEnforceUniquePackageName());</div><div class="line"></div><div class="line"><span class="keyword">if</span> (resOutBaseNameFile != <span class="keyword">null</span> &amp;&amp; LOG.isInfoEnabled()) &#123;</div><div class="line">    LOG.info(<span class="string">"Aapt output file &#123;&#125;"</span>, resOutBaseNameFile.getAbsolutePath());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>大概看一下，这里其实就是执行aapt的过程。</p>
+<p>大家应该没有手动执行过aapt的命令，那么跟着我一起看一下aapt命令是如何执行的。</p>
+<p>这里和前面提到的一样，只分析Aapt1，至于Aapt2，在这个版本还未成熟，还不能使用。<br><br></p>
+<p>那么，我们来看<code>builder.processResources(aapt, config, getEnforceUniquePackageName());</code>这个方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">AaptPackageConfig aaptConfig = aaptConfigBuilder.build();</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">    aapt.link(aaptConfig).get();</div><div class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> ProcessException(<span class="string">"Failed to execute aapt"</span>, e);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法我没有贴完，先看<code>aapt.link(aaptConfig)</code>方法，然后再继续往下看</p>
+<h4 id="AbstractAapt-link"><a href="#AbstractAapt-link" class="headerlink" title="AbstractAapt link"></a>AbstractAapt link</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ListenableFuture&lt;Void&gt; <span class="title">link</span><span class="params">(@NonNull AaptPackageConfig config)</span></span></div><div class="line">        <span class="keyword">throws</span> AaptException &#123;</div><div class="line">    validatePackageConfig(config); <span class="comment">// 做一些校验</span></div><div class="line">    <span class="keyword">return</span> makeValidatedPackage(config);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法很简单，就两个方法，<code>validatePackageConfig(config);</code>这个方法就是做一些校验，这里就不关心了。</p>
+<p><code>makeValidatedPackage(config);</code>其实就是执行aapt命令。</p>
+<p>那么如何执行命令呢，就是由其中的<code>ProcessInfoBuilder builder = makePackageProcessBuilder(config);</code>方法创建的，这里其实就是构成了执行aapt的命令，这个命令是:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">aapt package -v -f --no-crunch -i $&#123;android.jarPath&#125; -M $&#123;ManifestPath&#125; -S $&#123;resourcesDir&#125; -m -J $&#123;sourceOutputDir&#125; -F $&#123;resourceOutputApkPath&#125; -G $&#123;proguardOutputPath&#125; -D $&#123;mainDexClassListFilePath&#125; --debug-mode -0 apk --output-text-symbols $&#123;symbolOutputDirPath&#125;</div></pre></td></tr></table></figure>
+<p>如果是Android Library,则会添加<code>--non-constant-id</code>选项，看到这个选项应该能了解为何Library的R文件不是<code>public static final</code>了。</p>
+<p>如果buildTools &gt;= 23，则会添加<code>--no-version-vectors</code>。</p>
+<p>这个时候，apk的压缩等级为0。</p>
+<p>我们关注一下aapt命令中的各个路径:</p>
+<ul>
+<li>android.jarPath = <code>${sdk}/platforms/android-${compileSdk}/android.jar</code></li>
+<li>ManifestPath:<ul>
+<li>library中manifestFile路径为:<code>build/intermediates/manifests/aapt/${buildConfig}/AndroidManifest.xml</code></li>
+<li>app中manifestFile路径为: <code>build/intermediates/manifests/full/${buildConfig}/AndroidManifest.xml</code></li>
+</ul>
+</li>
+<li>resourcesDir = <code>build/intermediates/res/merged/${buildConfig}/</code></li>
+<li>sourceOutputDir = <code>build/generated/source/r/${buildTypes}/${packageName}</code></li>
+<li>resourceOutputApkPath <ul>
+<li>对于application来说，这个文件是`build/intermediates/res/resources-${buildType}.ap_</li>
+<li>对于library来说，为null</li>
+</ul>
+</li>
+<li>proguardOutputPath = <code>build/intermediates/proguard-rules/${buildType}/aapt_rules.txt</code></li>
+<li>mainDexClassListFilePath = <code>build/intermediates/multi-dex/${buildTypes}/manifest_keep.txt</code></li>
+<li>symbolOutputDirPath = <code>build/intermediates/symbols/${buildTypes}</code></li>
+</ul>
+<p>这里有两个文件夹的生成是有条件的，首先当然是proguardOutputPath，只有设置了<code>minifyEnabled true</code>，才会生成。</p>
+<p>第二，是mainDexClassListFilePath, 只有<code>minSdk &lt; 21 &amp;&amp; buildTools &gt; 24.0.0</code>才会生成。</p>
+<p>这样，aapt这个命令操作了哪些参数就很明显了，至于aapt对这些参数是如何处理的，这就不是我这篇博客的内容了，想了解这方面的内容，请到<a href="http://blog.csdn.net/luoshengyang/article/details/8744683" target="_blank" rel="external">老罗</a>的博客继续了解。<br><br></p>
+<p>好了，<code>aapt.link</code>方法分析完了，我们继续看<code>builder.processResources(aapt, config, getEnforceUniquePackageName());</code>这个方法剩下的内容，</p>
+<p>剩下的代码结果就是<code>build/generated/source/r/${buildTypes}/${packageName}</code>目录下的各个<code>R.java</code>文件，根据最终结果反推这些代码的含义还是很容易的，所以这里就不仔细分析了。</p>
+<p>这样，ProcessResTask就分析完毕了。<br><br></p>
+<p>我们来看下一个方法</p>
+<h3 id="createProcessJavaResTasks"><a href="#createProcessJavaResTasks" class="headerlink" title="createProcessJavaResTasks"></a>createProcessJavaResTasks</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createProcessJavaResTasks</span><span class="params">(</span></span></div><div class="line">        @NonNull TaskFactory tasks,</div><div class="line">        @NonNull VariantScope variantScope) &#123;</div><div class="line">    TransformManager transformManager = variantScope.getTransformManager();</div><div class="line"></div><div class="line">    <span class="comment">// now copy the source folders java resources into the temporary location, mainly to</span></div><div class="line">    <span class="comment">// maintain the PluginDsl COPY semantics.</span></div><div class="line">    AndroidTask&lt;Sync&gt; processJavaResourcesTask =</div><div class="line">            androidTasks.create(tasks, <span class="keyword">new</span> ProcessJavaResConfigAction(variantScope));</div><div class="line">    variantScope.setProcessJavaResourcesTask(processJavaResourcesTask);</div><div class="line"></div><div class="line">    <span class="comment">// create the stream generated from this task</span></div><div class="line">    variantScope.getTransformManager().addStream(OriginalStream.builder()</div><div class="line">            .addContentType(DefaultContentType.RESOURCES)</div><div class="line">            .addScope(Scope.PROJECT)</div><div class="line">            .setFolder(variantScope.getSourceFoldersJavaResDestinationDir())</div><div class="line">            .setDependency(processJavaResourcesTask.getName())</div><div class="line">            .build());</div><div class="line"></div><div class="line">    <span class="comment">// compute the scopes that need to be merged.</span></div><div class="line">    Set&lt;Scope&gt; mergeScopes = getResMergingScopes(variantScope);</div><div class="line"></div><div class="line">    <span class="comment">// Create the merge transform</span></div><div class="line">    MergeJavaResourcesTransform mergeTransform = <span class="keyword">new</span> MergeJavaResourcesTransform(</div><div class="line">            variantScope.getGlobalScope().getExtension().getPackagingOptions(),</div><div class="line">            mergeScopes, DefaultContentType.RESOURCES, <span class="string">"mergeJavaRes"</span>);</div><div class="line"></div><div class="line">    variantScope.setMergeJavaResourcesTask(</div><div class="line">            transformManager.addTransform(tasks, variantScope, mergeTransform));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法的作用就像名字说的，处理Java的资源，通常我们不会遇到Java的资源。</p>
+<p>但是有几种情况会出现Java资源：</p>
+<p>比如，使用RxJava的时候，使用okhttp的时候，这些库都带着Java的资源；还有Java Doc， LICENSE之类的资源。</p>
+<p>这里的资源根据你在packageOptions{}中设置的选项，最后merge成一个jar包或者一个文件夹，文件夹的情况我没见到过，这里就不分析了。</p>
+<p>Jar包的路径为<code>build/intermediates/transforms/mergeJavaRes/${buildType}/jars/${TypeValue}/${ScopesValue}/main.jar</code></p>
+<p>至于TypeValue和ScopesValue，这其实是<code>QualifiedContent</code>内部的<code>DefaultContentType</code>和<code>Scope</code>两个枚举类的value值。</p>
+<p>这里就是<code>Transform Api</code>的一些用法，看这个代码可以学习<code>Transform Api</code>，对于写<code>Gradle plugin</code>很有用。<br><br></p>
+<p>好了，这里的处理过程不是重点，我们了解生成什么就可以了，所以，ProcessJavaResTasks到这里就结束了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AndroidPlugin/" rel="tag"># AndroidPlugin</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/20/AndroidPlugin源码解析(五)/" rel="next" title="AndroidPlugin源码解析(五)">
+                <i class="fa fa-chevron-left"></i> AndroidPlugin源码解析(五)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/10/AndroidPlugin源码解析(七)/" rel="prev" title="AndroidPlugin源码解析(七)">
+                AndroidPlugin源码解析(七) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Air" />
+          <p class="site-author-name" itemprop="name">Air</p>
+           
+              <p class="site-description motion-element" itemprop="description">Write Something I Want</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yunair" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#createBuildConfigTask"><span class="nav-number">1.</span> <span class="nav-text">createBuildConfigTask</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createApkProcessResTask"><span class="nav-number">2.</span> <span class="nav-text">createApkProcessResTask</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AbstractAapt-link"><span class="nav-number">2.1.</span> <span class="nav-text">AbstractAapt link</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createProcessJavaResTasks"><span class="nav-number">3.</span> <span class="nav-text">createProcessJavaResTasks</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Air</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://yunair.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://air.com/2017/08/15/AndroidPlugin源码解析(六)/';
+          this.page.identifier = '2017/08/15/AndroidPlugin源码解析(六)/';
+          this.page.title = 'AndroidPlugin源码解析(六)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://yunair.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1149 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-max-osx.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="AndroidPlugin," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="前言前面我们分了8篇讲解整个Android Apk的打包过程，可以说我们中间几篇文章都是只见树木不见森林，研究了其中的细节，但缺少对这个过程的整体把握，这篇文章就是要填充缺少的整体图。 综述到目前为止，Android的打包框架从Ant&amp;amp;ADT渐渐转移到了Gradle :  Build Tools 19.0.0 之前，Ant&amp;amp;ADT作为最主要的框架 Build Tools 19.0.">
+<meta name="keywords" content="AndroidPlugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidPlugin源码解析(九)">
+<meta property="og:url" content="http://air.com/2017/10/08/AndroidPlugin源码解析(九)/index.html">
+<meta property="og:site_name" content="Air Little Place">
+<meta property="og:description" content="前言前面我们分了8篇讲解整个Android Apk的打包过程，可以说我们中间几篇文章都是只见树木不见森林，研究了其中的细节，但缺少对这个过程的整体把握，这篇文章就是要填充缺少的整体图。 综述到目前为止，Android的打包框架从Ant&amp;amp;ADT渐渐转移到了Gradle :  Build Tools 19.0.0 之前，Ant&amp;amp;ADT作为最主要的框架 Build Tools 19.0.">
+<meta property="og:image" content="http://air.com/img/androidBuild/android_build.png">
+<meta property="og:image" content="http://air.com/img/androidBuild/build_process_gradle.png">
+<meta property="og:image" content="http://air.com/img/androidBuild/Android_Build_Process.svg">
+<meta property="og:image" content="http://air.com/img/androidBuild/JackSitesDiagram.jpg">
+<meta property="og:image" content="http://air.com/img/androidBuild/javac_proguard_dex.png">
+<meta property="og:image" content="http://air.com/img/androidBuild/jack_jill_proguard.png">
+<meta property="og:updated_time" content="2017-10-08T03:43:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidPlugin源码解析(九)">
+<meta name="twitter:description" content="前言前面我们分了8篇讲解整个Android Apk的打包过程，可以说我们中间几篇文章都是只见树木不见森林，研究了其中的细节，但缺少对这个过程的整体把握，这篇文章就是要填充缺少的整体图。 综述到目前为止，Android的打包框架从Ant&amp;amp;ADT渐渐转移到了Gradle :  Build Tools 19.0.0 之前，Ant&amp;amp;ADT作为最主要的框架 Build Tools 19.0.">
+<meta name="twitter:image" content="http://air.com/img/androidBuild/android_build.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title>AndroidPlugin源码解析(九) | Air Little Place</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-103683322-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Air Little Place</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://air.com/2017/10/08/AndroidPlugin源码解析(九)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Air">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Air Little Place">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AndroidPlugin源码解析(九)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-08T00:00:00+08:00">
+                2017-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/10/08/AndroidPlugin源码解析(九)/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/10/08/AndroidPlugin源码解析(九)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前面我们分了8篇讲解整个Android Apk的打包过程，可以说我们中间几篇文章都是只见树木不见森林，研究了其中的细节，但缺少对这个过程的整体把握，这篇文章就是要填充缺少的整体图。</p>
+<h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p>到目前为止，Android的打包框架从Ant&amp;ADT渐渐转移到了Gradle :</p>
+<ol>
+<li>Build Tools 19.0.0 之前，Ant&amp;ADT作为最主要的框架</li>
+<li>Build Tools 19.0.0以后，开始使用Gradle作为打包过程的框架</li>
+</ol>
+<p>Android编译源码的方案从最初的Java Tool Chain新加了Jack &amp; Jill Tool Chain，现在又准备废弃Jack &amp; Jill Tool Chain了。</p>
+<ol>
+<li>Build Tools version 21.1.1之后，加入了Jack &amp; Jill Tool Chain</li>
+<li>已经准备废弃Jack &amp; Jill Tool Chain，未来通过javac和dx工具的修改提供Java8的支持。</li>
+</ol>
+<h3 id="经典打包过程"><a href="#经典打包过程" class="headerlink" title="经典打包过程"></a>经典打包过程</h3><p>图:</p>
+<p><img src="/img/androidBuild/android_build.png" alt="android_build.png"></p>
+<p>步骤如下:</p>
+<ol>
+<li>通过aapt打包res资源文件，生成R.java、resources.arsc和res文件（二进制 &amp; 非二进制如res/raw和pic保持原样）</li>
+<li>处理.aidl文件，生成对应的Java接口文件</li>
+<li>通过Java Compiler编译R.java、Java接口文件、Java源文件，生成.class文件</li>
+<li>通过dex命令，将.class文件和第三方库中的.class文件处理生成classes.dex</li>
+<li>通过apkbuilder工具，将aapt生成的resources.arsc和res文件、assets文件和classes.dex一起打包生成apk</li>
+<li>通过JarSigner工具，对上面的apk进行debug或release签名</li>
+<li>通过zipalign工具，将签名后的apk进行对齐处理。</li>
+</ol>
+<h3 id="使用Gradle后"><a href="#使用Gradle后" class="headerlink" title="使用Gradle后"></a>使用Gradle后</h3><p><strong>这就是我们前面重点讲的内容，先看一下图</strong></p>
+<p>打包过程图: </p>
+<p><img src="/img/androidBuild/build_process_gradle.png" alt="build_process_gradle.png"></p>
+<p>使用Gradle后最详细的打包图:<a href="https://sites.google.com/a/android.com/tools/tech-docs/new-build-system/build-workflow" target="_blank" rel="external">本图来源</a></p>
+<p><img src="/img/androidBuild/Android_Build_Process.svg" alt="Android_Build_Process.svg"></p>
+<p>这幅图中，我们没有分析<code>llvm-rs-cc</code>，<code>AIDL</code>，<code>NDK</code>周边的文件，剩下的我们都有提到。</p>
+<p>看完前面的过程再来看这幅图，不得不说这个图画的真的好，尤其注意对应左下角的图示说明，就可以看出Google是如何对这样一个打包过程进行分层的，把哪些工作交给哪部分去做。</p>
+<p>这对我们整体去设计一个大型的程序也很有帮助，将某些工作交给更合适的工具去做，而不是一个工具做所有的工作。</p>
+<h4 id="Jack-amp-Jill"><a href="#Jack-amp-Jill" class="headerlink" title="Jack &amp; Jill"></a>Jack &amp; Jill</h4><p>Jack &amp; Jill Tool Chain 只在Gradle框架中存在，但是因为看到<a href="https://android-developers.googleblog.com/2017/03/future-of-java-8-language-feature.html" target="_blank" rel="external">Google打算废弃Jack消息</a>，<br>这就是我不在前面的文章中分析Jack &amp; Jill的原因了，放两张图，稍微看一下就好。</p>
+<p><img src="/img/androidBuild/JackSitesDiagram.jpg" alt="JackSitesDiagram.jpg"></p>
+<h3 id="Proguard"><a href="#Proguard" class="headerlink" title="Proguard"></a>Proguard</h3><p>最后，两张图来了解一下proguard在这两个Tool Chain中在哪一步执行。</p>
+<p>对javac之后执行proguard的图：</p>
+<p><img src="/img/androidBuild/javac_proguard_dex.png" alt="javac_proguard_dex.png"></p>
+<p>Jack &amp; Jill Proguard执行流程:</p>
+<p><img src="/img/androidBuild/jack_jill_proguard.png" alt="jack_jill_proguard.png"></p>
+<p>看完了这个流程整体架构图，下面我们就看看gradle需要做哪些工作来把apk安装到手机上。</p>
+<h2 id="Task执行依赖"><a href="#Task执行依赖" class="headerlink" title="Task执行依赖"></a>Task执行依赖</h2><p>之前在Gradle学习博客中，我们可以知道，对于gradle来说，整个Tasks是一个图，执行某一个Task的时候会先执行它的依赖，所以我们打包的时候只要调用<code>install Task</code>即可，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">installTask.dependsOn(tasks, variantScope.getAssembleTask());</div><div class="line">variantOutputScope.getAssembleTask().dependsOn(tasks, zipAlignTask);</div><div class="line">zipAlignTask.dependsOn(tasks, packageApp);</div><div class="line">packageApp.dependsOn(tasks, stream.getDependencies());</div><div class="line">packageApp.dependsOn(tasks, validateSigningTask);</div><div class="line">packageApp.dependsOn(tasks, variantScope.getMergeAssetsTask());</div><div class="line">packageApp.dependsOn(tasks, variantOutputScope.getProcessResourcesTask());</div><div class="line">packageApp.optionalDependsOn(</div><div class="line">      tasks,</div><div class="line">      variantOutputScope.getShrinkResourcesTask(),</div><div class="line">      variantOutputScope.getVariantScope().getJavaCompilerTask(),</div><div class="line">      javacTask,</div><div class="line">      variantOutputData.packageSplitResourcesTask,</div><div class="line">      variantOutputData.packageSplitAbiTask);</div><div class="line">javacTask.dependsOn(tasks, javacIncrementalSafeguard);</div><div class="line">variantOutputScope.getProcessResourcesTask().dependsOn(tasks,</div><div class="line">                    scope.getMergeResourcesTask());</div><div class="line">generateBuildConfigTask.dependsOn(tasks, scope.getCheckManifestTask());</div><div class="line">scope.getSourceGenTask().dependsOn(tasks, generateBuildConfigTask.getName());</div><div class="line">mergeResourcesTask.dependsOn(tasks, scope.getPrepareDependenciesTask(), scope.getResourceGenTask());</div><div class="line">scope.getResourceGenTask().dependsOn(tasks, generateResValuesTask);</div></pre></td></tr></table></figure>
+<p>从这里粘贴的各个<code>dependsOn</code>方法可以看出，<code>scope.getSourceGenTask()</code>和<code>installTask</code>只有依赖其他Task，没有被其他Task依赖。<br><br><br><code>installTask</code>就不讲了，这就是应该我们开发完成后主动触发的。<br><br><br>那么<code>scope.getSourceGenTask()</code>是什么时候被触发的呢？</p>
+<p>原来，是我们在AS中点击sync的时候触发的，这个时候会执行<code>[:app:generateDebugSources]</code>，这样就触发了<code>scope.getSourceGenTask()</code>，因为它依赖<code>generateBuildConfigTask</code>，所以这个时候也会生成我们最终使用的<code>BuildConfig.java</code>文件，也会检测<code>Manifest</code>的合法性</p>
+<p>这样，我们就可以通过调用<code>installTask</code>，让这个Task帮我们调用所有它依赖的Task，来完成整个Apk的打包签名安装工作，<br>不过AS的gradle并不是只调用<code>installTask</code>而已，我觉得应该在<code>installTask</code>中途做了一个hook，加入了GUI，否则正常调用<code>installTask</code>的话，不会出现那个选择安装到哪个手机的对话框的。</p>
+<p>这样我们整个打包流程点和面都齐全了，这个系列的文章暂时就告一段落了，接下来有空会选择填前面文章中留下的坑，比如<code>classes如何变成dex的</code>，<code>aapt是如何处理那些资源的</code>等…</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AndroidPlugin/" rel="tag"># AndroidPlugin</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/30/AndroidPlugin源码解析(八)/" rel="next" title="AndroidPlugin源码解析(八)">
+                <i class="fa fa-chevron-left"></i> AndroidPlugin源码解析(八)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Air" />
+          <p class="site-author-name" itemprop="name">Air</p>
+           
+              <p class="site-description motion-element" itemprop="description">Write Something I Want</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yunair" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#综述"><span class="nav-number">2.</span> <span class="nav-text">综述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#经典打包过程"><span class="nav-number">2.1.</span> <span class="nav-text">经典打包过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Gradle后"><span class="nav-number">2.2.</span> <span class="nav-text">使用Gradle后</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Jack-amp-Jill"><span class="nav-number">2.2.1.</span> <span class="nav-text">Jack & Jill</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Proguard"><span class="nav-number">2.3.</span> <span class="nav-text">Proguard</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task执行依赖"><span class="nav-number">3.</span> <span class="nav-text">Task执行依赖</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Air</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://yunair.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://air.com/2017/10/08/AndroidPlugin源码解析(九)/';
+          this.page.identifier = '2017/10/08/AndroidPlugin源码解析(九)/';
+          this.page.title = 'AndroidPlugin源码解析(九)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://yunair.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

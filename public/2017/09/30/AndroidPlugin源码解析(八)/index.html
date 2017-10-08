@@ -1,0 +1,1135 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-max-osx.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="AndroidPlugin," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="这篇文章我们就来看看打包过程中最后一个方法createPackagingTask createPackagingTask12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747">
+<meta name="keywords" content="AndroidPlugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AndroidPlugin源码解析(八)">
+<meta property="og:url" content="http://air.com/2017/09/30/AndroidPlugin源码解析(八)/index.html">
+<meta property="og:site_name" content="Air Little Place">
+<meta property="og:description" content="这篇文章我们就来看看打包过程中最后一个方法createPackagingTask createPackagingTask12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747">
+<meta property="og:updated_time" content="2017-10-08T01:45:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AndroidPlugin源码解析(八)">
+<meta name="twitter:description" content="这篇文章我们就来看看打包过程中最后一个方法createPackagingTask createPackagingTask12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title>AndroidPlugin源码解析(八) | Air Little Place</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-103683322-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Air Little Place</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://air.com/2017/09/30/AndroidPlugin源码解析(八)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Air">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Air Little Place">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AndroidPlugin源码解析(八)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-30T00:00:00+08:00">
+                2017-09-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/30/AndroidPlugin源码解析(八)/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/09/30/AndroidPlugin源码解析(八)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这篇文章我们就来看看打包过程中最后一个方法<code>createPackagingTask</code></p>
+<h3 id="createPackagingTask"><a href="#createPackagingTask" class="headerlink" title="createPackagingTask"></a>createPackagingTask</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createPackagingTask</span><span class="params">(@NonNull TaskFactory tasks,</span></span></div><div class="line">                                @NonNull VariantScope variantScope,</div><div class="line">                                <span class="keyword">boolean</span> publishApk,</div><div class="line">                                @Nullable AndroidTask&lt;InstantRunWrapperTask&gt; fullBuildInfoGeneratorTask) &#123;</div><div class="line">    GlobalScope globalScope = variantScope.getGlobalScope();</div><div class="line">    ApkVariantData variantData = (ApkVariantData) variantScope.getVariantData();</div><div class="line"></div><div class="line">    <span class="keyword">boolean</span> signedApk = variantData.isSigned(); <span class="comment">// signingConfig配置不为null，且正确配置</span></div><div class="line">    <span class="keyword">boolean</span> multiOutput = variantData.getOutputs().size() &gt; <span class="number">1</span>; <span class="comment">// 这里由于忽视split，所以暂时认为这个值为false</span></div><div class="line"></div><div class="line">    GradleVariantConfiguration variantConfiguration = variantScope.getVariantConfiguration();</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * PrePackaging step class that will look if the packaging of the main APK split is</div><div class="line">     * necessary when running in InstantRun mode. In InstantRun mode targeting an api 23 or</div><div class="line">     * above device, resources are packaged in the main split APK. However when a warm swap is</div><div class="line">     * possible, it is not necessary to produce immediately the new main SPLIT since the runtime</div><div class="line">     * use the resources.ap_ file directly. However, as soon as an incompatible change forcing a</div><div class="line">     * cold swap is triggered, the main APK must be rebuilt (even if the resources were changed</div><div class="line">     * in a previous build).</div><div class="line">     */</div><div class="line">    IncrementalMode incrementalMode = getIncrementalMode(variantConfiguration);</div><div class="line"></div><div class="line">    List&lt;ApkVariantOutputData&gt; outputDataList = variantData.getOutputs();</div><div class="line"></div><div class="line">    <span class="comment">// loop on all outputs. The only difference will be the name of the task, and location</span></div><div class="line">    <span class="comment">// of the generated data.</span></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">final</span> ApkVariantOutputData variantOutputData : outputDataList) &#123;</div><div class="line">        <span class="keyword">final</span> VariantOutputScope variantOutputScope = variantOutputData.getScope();</div><div class="line"></div><div class="line">        <span class="keyword">final</span> String outputName = variantOutputData.getFullName();</div><div class="line">        InstantRunPatchingPolicy patchingPolicy =</div><div class="line">                variantScope.getInstantRunBuildContext().getPatchingPolicy();</div><div class="line"></div><div class="line">        DefaultGradlePackagingScope packagingScope =</div><div class="line">                <span class="keyword">new</span> DefaultGradlePackagingScope(variantOutputScope);</div><div class="line"></div><div class="line">        AndroidTask&lt;PackageApplication&gt; packageApp =</div><div class="line">                androidTasks.create(</div><div class="line">                        tasks,</div><div class="line">                        <span class="keyword">new</span> PackageApplication.StandardConfigAction(</div><div class="line">                                packagingScope, patchingPolicy));</div><div class="line"></div><div class="line">        packageApp.configure(</div><div class="line">                tasks,</div><div class="line">                task -&gt; variantOutputData.packageAndroidArtifactTask = task);</div><div class="line"></div><div class="line">        TransformManager transformManager = variantScope.getTransformManager();</div><div class="line"></div><div class="line">        <span class="comment">// Common code for both packaging tasks.</span></div><div class="line">        Consumer&lt;AndroidTask&lt;PackageApplication&gt;&gt; configureResourcesAndAssetsDependencies =</div><div class="line">                task -&gt; &#123;</div><div class="line">                    task.dependsOn(tasks, variantScope.getMergeAssetsTask());</div><div class="line">                    task.dependsOn(tasks, variantOutputScope.getProcessResourcesTask());</div><div class="line">                    transformManager</div><div class="line">                            .getStreams(StreamFilter.RESOURCES)</div><div class="line">                            .forEach(stream -&gt; task.dependsOn(tasks, stream.getDependencies()));</div><div class="line">                &#125;;</div><div class="line"></div><div class="line">        configureResourcesAndAssetsDependencies.accept(packageApp);</div><div class="line">        </div><div class="line">        CoreSigningConfig signingConfig = packagingScope.getSigningConfig();</div><div class="line"></div><div class="line">        <span class="comment">//noinspection VariableNotUsedInsideIf - we use the whole packaging scope below.</span></div><div class="line">        <span class="keyword">if</span> (signingConfig != <span class="keyword">null</span>) &#123;</div><div class="line">            ValidateSigningTask.ConfigAction configAction =</div><div class="line">                    <span class="keyword">new</span> ValidateSigningTask.ConfigAction(packagingScope);</div><div class="line"></div><div class="line">            AndroidTask&lt;?&gt; validateSigningTask = androidTasks.get(configAction.getName());</div><div class="line">            <span class="keyword">if</span> (validateSigningTask == <span class="keyword">null</span>) &#123;</div><div class="line">                validateSigningTask = androidTasks.create(tasks, configAction);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            packageApp.dependsOn(tasks, validateSigningTask);</div><div class="line">        &#125;</div><div class="line"></div><div class="line"></div><div class="line">        packageApp.optionalDependsOn(</div><div class="line">                tasks,</div><div class="line">                variantOutputScope.getShrinkResourcesTask(),</div><div class="line">                <span class="comment">// <span class="doctag">TODO:</span> When Jack is converted, add activeDexTask to VariantScope.</span></div><div class="line">                variantOutputScope.getVariantScope().getJavaCompilerTask(),</div><div class="line">                <span class="comment">// <span class="doctag">TODO:</span> Remove when Jack is converted to AndroidTask.</span></div><div class="line">                variantData.javaCompilerTask,</div><div class="line">                variantOutputData.packageSplitResourcesTask,</div><div class="line">                variantOutputData.packageSplitAbiTask);</div><div class="line"></div><div class="line"></div><div class="line">        <span class="keyword">for</span> (TransformStream stream : transformManager.getStreams(StreamFilter.DEX)) &#123;</div><div class="line">            <span class="comment">// TODO Optimize to avoid creating too many actions</span></div><div class="line">            packageApp.dependsOn(tasks, stream.getDependencies());</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">for</span> (TransformStream stream : transformManager.getStreams(StreamFilter.NATIVE_LIBS)) &#123;</div><div class="line">            <span class="comment">// TODO Optimize to avoid creating too many actions</span></div><div class="line">            packageApp.dependsOn(tasks, stream.getDependencies());</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        variantScope.setPackageApplicationTask(packageApp);</div><div class="line"></div><div class="line">        AndroidTask&lt;?&gt; appTask = packageApp;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (signedApk) &#123;</div><div class="line">            <span class="comment">/*</span></div><div class="line">             * There may be a zip align task in the variant output scope, even if we don't</div><div class="line">             * need one for this because we're using new packaging.</div><div class="line">             */</div><div class="line">            <span class="keyword">if</span> (variantData.getZipAlignEnabled()</div><div class="line">                    &amp;&amp; variantOutputScope.getSplitZipAlignTask() != <span class="keyword">null</span>) &#123;</div><div class="line">                appTask.dependsOn(tasks, variantOutputScope.getSplitZipAlignTask());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// single output</span></div><div class="line">        variantOutputScope.setAssembleTask(variantScope.getAssembleTask());</div><div class="line">        variantOutputData.assembleTask = variantData.assembleVariantTask;</div><div class="line"></div><div class="line">        variantOutputScope.getAssembleTask().dependsOn(tasks, appTask);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (publishApk) &#123;</div><div class="line">            <span class="keyword">final</span> String projectBaseName = globalScope.getProjectBaseName();</div><div class="line"></div><div class="line">            <span class="comment">// if this variant is the default publish config or we also should publish non</span></div><div class="line">            <span class="comment">// defaults, proceed with declaring our artifacts.</span></div><div class="line">            <span class="keyword">if</span> (getExtension().getDefaultPublishConfig().equals(outputName)) &#123;</div><div class="line">                appTask.configure(tasks, packageTask -&gt; project.getArtifacts().add(<span class="string">"default"</span>,</div><div class="line">                        <span class="keyword">new</span> ApkPublishArtifact(</div><div class="line">                                projectBaseName,</div><div class="line">                                <span class="keyword">null</span>,</div><div class="line">                                (FileSupplier) packageTask)));</div><div class="line"></div><div class="line">                <span class="keyword">for</span> (FileSupplier outputFileProvider :</div><div class="line">                        variantOutputData.getSplitOutputFileSuppliers()) &#123;</div><div class="line">                    project.getArtifacts().add(<span class="string">"default"</span>,</div><div class="line">                            <span class="keyword">new</span> ApkPublishArtifact(projectBaseName, <span class="keyword">null</span>, outputFileProvider));</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (variantOutputData.getMetadataFile() != <span class="keyword">null</span>) &#123;</div><div class="line">                        project.getArtifacts().add(</div><div class="line">                                <span class="string">"default"</span> + VariantDependencies.CONFIGURATION_METADATA,</div><div class="line">                                <span class="keyword">new</span> MetadataPublishArtifact(projectBaseName, <span class="keyword">null</span>,</div><div class="line">                                        variantOutputData.getMetadataFile()));</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (variantData.getMappingFileProvider() != <span class="keyword">null</span>) &#123;</div><div class="line">                    project.getArtifacts().add(</div><div class="line">                            <span class="string">"default"</span> + VariantDependencies.CONFIGURATION_MAPPING,</div><div class="line">                            <span class="keyword">new</span> MappingPublishArtifact(projectBaseName, <span class="keyword">null</span>,</div><div class="line">                                    variantData.getMappingFileProvider()));</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (getExtension().getPublishNonDefault()) &#123;</div><div class="line">                appTask.configure(tasks, packageTask -&gt; project.getArtifacts().add(</div><div class="line">                        variantData.getVariantDependency().getPublishConfiguration().getName(),</div><div class="line">                        <span class="keyword">new</span> ApkPublishArtifact(</div><div class="line">                                projectBaseName,</div><div class="line">                                <span class="keyword">null</span>,</div><div class="line">                                (FileSupplier) packageTask)));</div><div class="line"></div><div class="line">                <span class="keyword">for</span> (FileSupplier outputFileProvider :</div><div class="line">                        variantOutputData.getSplitOutputFileSuppliers()) &#123;</div><div class="line">                    project.getArtifacts().add(</div><div class="line">                            variantData.getVariantDependency().getPublishConfiguration().getName(),</div><div class="line">                            <span class="keyword">new</span> ApkPublishArtifact(</div><div class="line">                                    projectBaseName,</div><div class="line">                                    <span class="keyword">null</span>,</div><div class="line">                                    outputFileProvider));</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (variantOutputData.getMetadataFile() != <span class="keyword">null</span>) &#123;</div><div class="line">                        project.getArtifacts().add(</div><div class="line">                                variantData.getVariantDependency().getMetadataConfiguration().getName(),</div><div class="line">                                <span class="keyword">new</span> MetadataPublishArtifact(</div><div class="line">                                        projectBaseName,</div><div class="line">                                        <span class="keyword">null</span>,</div><div class="line">                                        variantOutputData.getMetadataFile()));</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (variantData.getMappingFileProvider() != <span class="keyword">null</span>) &#123;</div><div class="line">                    project.getArtifacts().add(</div><div class="line">                            variantData.getVariantDependency().getMappingConfiguration().getName(),</div><div class="line">                            <span class="keyword">new</span> MappingPublishArtifact(</div><div class="line">                                    projectBaseName,</div><div class="line">                                    <span class="keyword">null</span>,</div><div class="line">                                    variantData.getMappingFileProvider()));</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (variantData.classesJarTask != <span class="keyword">null</span>) &#123;</div><div class="line">                    project.getArtifacts().add(</div><div class="line">                            variantData.getVariantDependency().getClassesConfiguration().getName(),</div><div class="line">                            variantData.classesJarTask);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">// create install task for the variant Data. This will deal with finding the</span></div><div class="line">    <span class="comment">// right output if there are more than one.</span></div><div class="line">    <span class="comment">// Add a task to install the application package</span></div><div class="line">    <span class="keyword">if</span> (signedApk) &#123;</div><div class="line">        AndroidTask&lt;InstallVariantTask&gt; installTask = androidTasks.create(</div><div class="line">                tasks, <span class="keyword">new</span> InstallVariantTask.ConfigAction(variantScope));</div><div class="line">        installTask.dependsOn(tasks, variantScope.getAssembleTask());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (getExtension().getLintOptions().isCheckReleaseBuilds()</div><div class="line">            &amp;&amp; (incrementalMode == IncrementalMode.NONE)) &#123;</div><div class="line">        createLintVitalTask(tasks, variantData);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// add an uninstall task</span></div><div class="line">    <span class="keyword">final</span> AndroidTask&lt;UninstallTask&gt; uninstallTask = androidTasks.create(</div><div class="line">            tasks, <span class="keyword">new</span> UninstallTask.ConfigAction(variantScope));</div><div class="line"></div><div class="line">    tasks.named(UNINSTALL_ALL, uninstallAll -&gt; uninstallAll.dependsOn(uninstallTask.getName()));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法很长，我们挑重点来看。</p>
+<p>先看<code>AndroidTask&lt;PackageApplication&gt;</code>这个Task，这个Task具体做哪些事情呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doFullTaskAction</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    <span class="comment">/*</span></div><div class="line">     * Clear the cache to make sure we have do not do an incremental build.</div><div class="line">     */</div><div class="line">    cacheByPath.clear();</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * Also clear the intermediate build directory. We don't know if anything is in there and</div><div class="line">     * since this is a full build, we don't want to get any interference from previous state.</div><div class="line">     */</div><div class="line">    <span class="comment">// build/intermediates/incremental/</span></div><div class="line">    FileUtils.deleteDirectoryContents(getIncrementalFolder());</div><div class="line"></div><div class="line">    Set&lt;File&gt; androidResources = <span class="keyword">new</span> HashSet&lt;&gt;();</div><div class="line">    <span class="comment">// build/intermediates/res/resources-$&#123;buildType&#125;.ap_</span></div><div class="line">    <span class="comment">// 开启shrinkResources build/intermediates/res/resources-$&#123;buildType&#125;-stripped.ap_</span></div><div class="line">    File androidResourceFile = getResourceFile();</div><div class="line">    <span class="keyword">if</span> (androidResourceFile != <span class="keyword">null</span>) &#123;</div><div class="line">        androidResources.add(androidResourceFile);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * Additionally, make sure we have no previous package, if it exists.</div><div class="line">     */</div><div class="line">    <span class="comment">// build/outpus/apk/</span></div><div class="line">    getOutputFile().delete();</div><div class="line"></div><div class="line">    ImmutableMap&lt;RelativeFile, FileStatus&gt; updatedDex =</div><div class="line">            IncrementalRelativeFileSets.fromZipsAndDirectories(getDexFolders());</div><div class="line">    ImmutableMap&lt;RelativeFile, FileStatus&gt; updatedJavaResources =</div><div class="line">                IncrementalRelativeFileSets.fromZipsAndDirectories(getJavaResourceFiles());</div><div class="line">    ImmutableMap&lt;RelativeFile, FileStatus&gt; updatedAssets =</div><div class="line">                IncrementalRelativeFileSets.fromZipsAndDirectories(</div><div class="line">                        Collections.singleton(getAssets()));</div><div class="line">    ImmutableMap&lt;RelativeFile, FileStatus&gt; updatedAndroidResources =</div><div class="line">            IncrementalRelativeFileSets.fromZipsAndDirectories(androidResources);</div><div class="line">    ImmutableMap&lt;RelativeFile, FileStatus&gt; updatedJniResources=</div><div class="line">            IncrementalRelativeFileSets.fromZipsAndDirectories(getJniFolders());</div><div class="line"></div><div class="line">    doTask(</div><div class="line">            updatedDex,</div><div class="line">            updatedJavaResources,</div><div class="line">            updatedAssets,</div><div class="line">            updatedAndroidResources,</div><div class="line">            updatedJniResources);</div><div class="line"></div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这段代码里关键代码执行路径都写在了注释里，发现这段代码调用了<code>doTask</code>方法，我们看看这个方法做了什么:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doTask</span><span class="params">(</span></span></div><div class="line">        @NonNull ImmutableMap&lt;RelativeFile, FileStatus&gt; changedDex,</div><div class="line">        @NonNull ImmutableMap&lt;RelativeFile, FileStatus&gt; changedJavaResources,</div><div class="line">        @NonNull ImmutableMap&lt;RelativeFile, FileStatus&gt; changedAssets,</div><div class="line">        @NonNull ImmutableMap&lt;RelativeFile, FileStatus&gt; changedAndroidResources,</div><div class="line">        @NonNull ImmutableMap&lt;RelativeFile, FileStatus&gt; changedNLibs)</div><div class="line">        <span class="keyword">throws</span> IOException &#123;</div><div class="line">    PrivateKey key;</div><div class="line">    X509Certificate certificate;</div><div class="line">    <span class="keyword">boolean</span> v1SigningEnabled;</div><div class="line">    <span class="keyword">boolean</span> v2SigningEnabled;</div><div class="line"></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (signingConfig != <span class="keyword">null</span> &amp;&amp; signingConfig.isSigningReady()) &#123;</div><div class="line">            CertificateInfo certificateInfo =</div><div class="line">                    KeystoreHelper.getCertificateInfo(</div><div class="line">                            signingConfig.getStoreType(),</div><div class="line">                            checkNotNull(signingConfig.getStoreFile()),</div><div class="line">                            checkNotNull(signingConfig.getStorePassword()),</div><div class="line">                            checkNotNull(signingConfig.getKeyPassword()),</div><div class="line">                            checkNotNull(signingConfig.getKeyAlias()));</div><div class="line">            key = certificateInfo.getKey();</div><div class="line">            certificate = certificateInfo.getCertificate();</div><div class="line">            v1SigningEnabled = signingConfig.isV1SigningEnabled();</div><div class="line">            v2SigningEnabled = signingConfig.isV2SigningEnabled();</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            key = <span class="keyword">null</span>;</div><div class="line">            certificate = <span class="keyword">null</span>;</div><div class="line">            v1SigningEnabled = <span class="keyword">false</span>;</div><div class="line">            v2SigningEnabled = <span class="keyword">false</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        ApkCreatorFactory.CreationData creationData =</div><div class="line">                <span class="keyword">new</span> ApkCreatorFactory.CreationData(</div><div class="line">                        getOutputFile(),</div><div class="line">                        key,</div><div class="line">                        certificate,</div><div class="line">                        v1SigningEnabled,</div><div class="line">                        v2SigningEnabled,</div><div class="line">                        <span class="keyword">null</span>, <span class="comment">// BuiltBy</span></div><div class="line">                        getBuilder().getCreatedBy(),</div><div class="line">                        getMinSdkVersion(),</div><div class="line">                        PackagingUtils.getNativeLibrariesLibrariesPackagingMode(manifest),</div><div class="line">                        getNoCompressPredicate()::apply);</div><div class="line"></div><div class="line">        <span class="keyword">try</span> (IncrementalPackager packager = createPackager(creationData)) &#123;</div><div class="line">            packager.updateDex(changedDex);</div><div class="line">            packager.updateJavaResources(changedJavaResources);</div><div class="line">            packager.updateAssets(changedAssets);</div><div class="line">            packager.updateAndroidResources(changedAndroidResources);</div><div class="line">            packager.updateNativeLibraries(changedNLibs);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (PackagerException | KeytoolException e) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * Save all used zips in the cache.</div><div class="line">     */</div><div class="line">    <span class="comment">// cache相关代码，忽视掉</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看到这些参数<code>v1SigningEnabled, v2SigningEnabled</code>不知道你会联想到什么，没错，就是和apk签名相关。</p>
+<p>这里的核心就是这段代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">IncrementalPackager packager = createPackager(creationData))</div><div class="line">packager.updateDex(changedDex);</div><div class="line">packager.updateJavaResources(changedJavaResources);</div><div class="line">packager.updateAssets(changedAssets);</div><div class="line">packager.updateAndroidResources(changedAndroidResources);</div><div class="line">packager.updateNativeLibraries(changedNLibs);</div></pre></td></tr></table></figure>
+<p>创建<code>Packager</code>对象这里就不看了，在下面的方法中用到这里面的参数的时候再来讲讲对应参数的含义。<br>也就是看一下接下来的5个方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">packager.updateDex(changedDex);</div><div class="line">packager.updateJavaResources(changedJavaResources);</div><div class="line">packager.updateAssets(changedAssets);</div><div class="line">packager.updateAndroidResources(changedAndroidResources);</div></pre></td></tr></table></figure>
+<p>后面这5个方法最终全部是调用<code>updateFiles</code>方法，这个方法的主要执行的都是<code>mApkCreator</code>对象的方法，所以先讲一下<code>ApkCreator</code>这个对象，讲完之后再来看一看这个方法:</p>
+<p>对于ApkZFileCreator的构造函数来说，主要是构造了一个<code>ZFile</code>文件，我们直接看那个方法:</p>
+<h4 id="ZFiles-apk"><a href="#ZFiles-apk" class="headerlink" title="ZFiles apk"></a>ZFiles apk</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ZFile <span class="title">apk</span><span class="params">(</span></span></div><div class="line">        @NonNull File f,</div><div class="line">        @NonNull ZFileOptions options,</div><div class="line">        @Nullable PrivateKey key,</div><div class="line">        @Nullable X509Certificate certificate,</div><div class="line">        <span class="keyword">boolean</span> v1SigningEnabled,</div><div class="line">        <span class="keyword">boolean</span> v2SigningEnabled,</div><div class="line">        @Nullable String builtBy,</div><div class="line">        @Nullable String createdBy,</div><div class="line">        <span class="keyword">int</span> minSdkVersion)</div><div class="line">        <span class="keyword">throws</span> IOException &#123;</div><div class="line">    ZFile zfile = apk(f, options);</div><div class="line">    <span class="comment">// 根据我们的代码分析过程，这里是null</span></div><div class="line">    <span class="keyword">if</span> (builtBy == <span class="keyword">null</span>) &#123;  </div><div class="line">        builtBy = DEFAULT_BUILD_BY;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (createdBy == <span class="keyword">null</span>) &#123;</div><div class="line">        createdBy = DEFAULT_CREATED_BY;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ManifestGenerationExtension manifestExt = <span class="keyword">new</span> ManifestGenerationExtension(builtBy,</div><div class="line">            createdBy);</div><div class="line">    manifestExt.register(zfile);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (key != <span class="keyword">null</span> &amp;&amp; certificate != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">if</span> (v1SigningEnabled) &#123;</div><div class="line">                String apkSignedHeaderValue =</div><div class="line">                        (v2SigningEnabled)</div><div class="line">                                ? SignatureExtension</div><div class="line">                                        .SIGNATURE_ANDROID_APK_SIGNER_VALUE_WHEN_V2_SIGNED</div><div class="line">                                : <span class="keyword">null</span>;</div><div class="line">                SignatureExtension jarSignatureSchemeExt = <span class="keyword">new</span> SignatureExtension(manifestExt,</div><div class="line">                        minSdkVersion, certificate, key,</div><div class="line">                        apkSignedHeaderValue);</div><div class="line">                jarSignatureSchemeExt.register();</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (v2SigningEnabled) &#123;</div><div class="line">                FullApkSignExtension apkSignatureSchemeV2Ext =</div><div class="line">                        <span class="keyword">new</span> FullApkSignExtension(</div><div class="line">                                zfile,</div><div class="line">                                minSdkVersion,</div><div class="line">                                certificate,</div><div class="line">                                key);</div><div class="line">                apkSignatureSchemeV2Ext.register();</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (!v1SigningEnabled) &#123;</div><div class="line">                <span class="comment">// Remove v1 signature files from the APK</span></div><div class="line">                <span class="keyword">for</span> (StoredEntry entry : zfile.entries()) &#123;</div><div class="line">                    <span class="keyword">if</span> (SignatureExtension.isIgnoredFile(</div><div class="line">                            entry.getCentralDirectoryHeader().getName())) &#123;</div><div class="line">                        entry.delete();</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> zfile;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>首先，这个方法通过<code>apk(f, options)</code>生成了<code>ZFile</code>文件，这个方法设置了<code>ZFile</code>的对齐规则，然后，调用<code>ZFile</code>的构造函数生成<code>ZFile</code>，也就是空的最终生成的<code>Apk</code>文件，生成之后，我们继续往下看，可以看到，这里有几个<code>Extension</code>, 分别为<code>ManifestGenerationExtension</code>, <code>SignatureExtension</code>, <code>FullApkSignExtension</code>, 我们来看看这三个类的作用是什么:</p>
+<h5 id="ManifestGenerationExtension-register"><a href="#ManifestGenerationExtension-register" class="headerlink" title="ManifestGenerationExtension register"></a>ManifestGenerationExtension register</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(@NonNull ZFile zFile)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    Preconditions.checkState(mExtension == <span class="keyword">null</span>, <span class="string">"register() has already been invoked."</span>);</div><div class="line">    mZFile = zFile;</div><div class="line"></div><div class="line">    rebuildManifest();</div><div class="line"></div><div class="line">    mExtension = <span class="keyword">new</span> ZFileExtension() &#123;</div><div class="line">        <span class="meta">@Nullable</span></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> IOExceptionRunnable <span class="title">beforeUpdate</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> ManifestGenerationExtension.<span class="keyword">this</span>::updateManifest;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    mZFile.addZFileExtension(mExtension);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法的核心在<code>mZFile.addZFileExtension(mExtension);</code>，这个<code>ZFileExtension</code>的作用是在<code>ZFile</code>对应状态的时候通知该<code>Extensions</code>执行操作。<br>在最终的Apk中，反编译一下，<code>META-INF/MANIFEST.MF</code>这个文件就是这里生成的。</p>
+<h5 id="SignatureExtension-register"><a href="#SignatureExtension-register" class="headerlink" title="SignatureExtension register"></a>SignatureExtension register</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    Preconditions.checkState(mExtension == <span class="keyword">null</span>, <span class="string">"register() already invoked"</span>);</div><div class="line"></div><div class="line">    mExtension = <span class="keyword">new</span> ZFileExtension() &#123;</div><div class="line">        <span class="meta">@Nullable</span></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> IOExceptionRunnable <span class="title">beforeUpdate</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> SignatureExtension.<span class="keyword">this</span>::updateSignatureIfNeeded;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Nullable</span></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> IOExceptionRunnable <span class="title">added</span><span class="params">(@NonNull <span class="keyword">final</span> StoredEntry entry,</span></span></div><div class="line">                @Nullable <span class="keyword">final</span> StoredEntry replaced) &#123;</div><div class="line">            <span class="keyword">if</span> (replaced != <span class="keyword">null</span>) &#123;</div><div class="line">                Preconditions.checkArgument(entry.getCentralDirectoryHeader().getName().equals(</div><div class="line">                        replaced.getCentralDirectoryHeader().getName()));</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (isIgnoredFile(entry.getCentralDirectoryHeader().getName())) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> () -&gt; &#123;</div><div class="line">                <span class="keyword">if</span> (replaced != <span class="keyword">null</span>) &#123;</div><div class="line">                    SignatureExtension.<span class="keyword">this</span>.removed(replaced);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                SignatureExtension.<span class="keyword">this</span>.added(entry);</div><div class="line">            &#125;;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Nullable</span></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> IOExceptionRunnable <span class="title">removed</span><span class="params">(@NonNull <span class="keyword">final</span> StoredEntry entry)</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (isIgnoredFile(entry.getCentralDirectoryHeader().getName())) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> () -&gt; SignatureExtension.<span class="keyword">this</span>.removed(entry);</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    mManifestExtension.zFile().addZFileExtension(mExtension);</div><div class="line">    readSignatureFile();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里也是一样，注册了一个<code>ZFileExtension</code>，作用就是在后面写入文件的时候进行签名，这个签名文件的位置是<code>META-INF/CERT.SF</code><br>这里是V1签名的实现，如果允许V2签名，则在该文件的前几行的存在<code>X-Android-APK-Signed: 2</code>这个声明，否则的话说明没开启V2签名。<br>V2签名的<code>register</code>实现我们就不看了，和这个类似，如果想研究V2签名的细节，这里很重要，但是你要了解Zip文件格式再来看会很有帮助。</p>
+<p>好了，这些讲完之后我们就可以看<code>updateFiles</code>方法了，记得每次<code>ZFile</code>文件改变状态的时候，都会回调上面的这些<code>Extension</code>。</p>
+<h4 id="IncrementalPackager-updateFiles"><a href="#IncrementalPackager-updateFiles" class="headerlink" title="IncrementalPackager updateFiles"></a>IncrementalPackager updateFiles</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateFiles</span><span class="params">(@NonNull Set&lt;PackagedFileUpdate&gt; updates)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    Preconditions.checkNotNull(mApkCreator, <span class="string">"mApkCreator == null"</span>);</div><div class="line">    </div><div class="line">    <span class="comment">// 这个的意思是拿到状态为`FileStatus.REMOVED`的文件，接下来拿到文件名</span></div><div class="line">    Iterable&lt;String&gt; deletedPaths =</div><div class="line">            Iterables.transform(</div><div class="line">                    Iterables.filter(</div><div class="line">                            updates,</div><div class="line">                            Predicates.compose(</div><div class="line">                                    Predicates.equalTo(FileStatus.REMOVED),</div><div class="line">                                    PackagedFileUpdate.EXTRACT_STATUS)),</div><div class="line">                    PackagedFileUpdate.EXTRACT_NAME);</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (String deletedPath : deletedPaths) &#123;</div><div class="line">        mApkCreator.deleteFile(deletedPath);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">// 状态为FileStatus.NEW或者FileStatus.CHANGED的PackagedFileUpdate断言</span></div><div class="line">    Predicate&lt;PackagedFileUpdate&gt; isNewOrChanged =</div><div class="line">            Predicates.compose(</div><div class="line">                    Predicates.or(</div><div class="line">                            Predicates.equalTo(FileStatus.NEW),</div><div class="line">                            Predicates.equalTo(FileStatus.CHANGED)),</div><div class="line">                    PackagedFileUpdate.EXTRACT_STATUS);</div><div class="line">    <span class="comment">// Source为Base的文件，source的类型为`build/intermediates/incremental/package$&#123;buildType&#125;/dex-renamer-state.txt`</span></div><div class="line">    Function&lt;PackagedFileUpdate, File&gt; extractBaseFile =</div><div class="line">            Functions.compose(</div><div class="line">                    RelativeFile.EXTRACT_BASE,</div><div class="line">                    PackagedFileUpdate.EXTRACT_SOURCE);</div><div class="line"></div><div class="line">    Iterable&lt;PackagedFileUpdate&gt; newOrChangedNonArchiveFiles =</div><div class="line">            Iterables.filter(</div><div class="line">                    updates,</div><div class="line">                    Predicates.and(</div><div class="line">                            isNewOrChanged,</div><div class="line">                            Predicates.compose(</div><div class="line">                                    Files.isDirectory(),</div><div class="line">                                    extractBaseFile)));</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (PackagedFileUpdate rf : newOrChangedNonArchiveFiles) &#123;</div><div class="line">        mApkCreator.writeFile(rf.getSource().getFile(), rf.getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Iterable&lt;PackagedFileUpdate&gt; newOrChangedArchiveFiles =</div><div class="line">            Iterables.filter(</div><div class="line">                    updates,</div><div class="line">                    Predicates.and(</div><div class="line">                            isNewOrChanged,</div><div class="line">                            Predicates.compose(</div><div class="line">                                    Files.isFile(),</div><div class="line">                                    extractBaseFile)));</div><div class="line"></div><div class="line">    Iterable&lt;File&gt; archives = Iterables.transform(newOrChangedArchiveFiles, extractBaseFile);</div><div class="line">    Set&lt;String&gt; names = Sets.newHashSet(</div><div class="line">            Iterables.transform(</div><div class="line">                    newOrChangedArchiveFiles,</div><div class="line">                    PackagedFileUpdate.EXTRACT_NAME));</div><div class="line"></div><div class="line">    <span class="comment">/*</span></div><div class="line">     * Build the name map. The name of the file in the filesystem (or zip file) may not</div><div class="line">     * match the name we want to package it as. See PackagedFileUpdate for more information.</div><div class="line">     */</div><div class="line">    Map&lt;String, String&gt; pathNameMap = Maps.newHashMap();</div><div class="line">    <span class="keyword">for</span> (PackagedFileUpdate archiveUpdate : newOrChangedArchiveFiles) &#123;</div><div class="line">        pathNameMap.put(archiveUpdate.getSource().getOsIndependentRelativePath(),</div><div class="line">                archiveUpdate.getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (File arch : Sets.newHashSet(archives)) &#123;</div><div class="line">        mApkCreator.writeZip(arch, pathNameMap::get, name -&gt; !names.contains(name));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>首先通过各种条件过滤出符合条件的文件列表，然后通过<code>mApkCreator.writeFile</code> <code>mApkCreator.writeZip</code>这两个方法将文件写入apk中。</p>
+<p>这里就不详细讲了，因为这些方法最终还是调用<code>ZFile</code>对象的方法，想了解这些方法的具体实现，请先了解Zip文件格式，或者等我之后的文章。</p>
+<p>这样，就把所有的<code>Dex</code>, <code>JavaResources</code>, <code>Assets</code>, <code>AndroidResources</code>, <code>JniResources</code>，写入Apk文件中，并进行了签名。<br><br></p>
+<p>回到<code>createPackagingTask</code>方法继续往下看，可以看到有<code>ValidateSigningTask</code>这个Task。</p>
+<p>这个Task我们就不详细解释了，因为代码很容易理解，就是检测<code>keystore</code>文件是否存在，不存在的话检测默认的<code>debug.keystore</code>。</p>
+<p>因为<code>packageApp.dependsOn(tasks, validateSigningTask);</code>这个方法，我们知道，先验证签名后打包Apk。<br><br></p>
+<p>好了，继续往下看，可以看到一个<code>ZipAlign</code>的Task，这个Task的任务就是执行<code>zipalign</code>，也就是将文件进行4位对齐。</p>
+<p>这个Task构造了<code>zipalign</code>的命令行参数，执行的命令为<code>${zipalignPath}/zipalign -f -p 4 ${inputFile} ${outputFile}</code><br><br></p>
+<p>下面就是<code>if (publishApk)</code>这个if条件了，里面的内容就是增加最终输出的文件的个数，每个<code>Artifact</code>代表一个最终的文件。<br>我们这个系列的文章主要是apk的流程，所以这里就不详细分析了。<br><br></p>
+<p>前面完成了打包Task，后面就可以安装到手机里了，安装到手机由<code>InstallVariantTask</code>这个任务完成。</p>
+<p>这个任务使用<code>adb</code>，将文件传入手机中，并使用<code>pm</code>命令安装apk。原先我还以为直接使用<code>adb install -r ${apkFile}</code>来实现的，原来不是我理解的啊。</p>
+<p>最后，添加<code>Lint</code>任务，加入卸载Apk的任务，这样，整个Apk打包流程就结束了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/AndroidPlugin/" rel="tag"># AndroidPlugin</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/10/AndroidPlugin源码解析(七)/" rel="next" title="AndroidPlugin源码解析(七)">
+                <i class="fa fa-chevron-left"></i> AndroidPlugin源码解析(七)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/08/AndroidPlugin源码解析(九)/" rel="prev" title="AndroidPlugin源码解析(九)">
+                AndroidPlugin源码解析(九) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Air" />
+          <p class="site-author-name" itemprop="name">Air</p>
+           
+              <p class="site-description motion-element" itemprop="description">Write Something I Want</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yunair" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#createPackagingTask"><span class="nav-number">1.</span> <span class="nav-text">createPackagingTask</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ZFiles-apk"><span class="nav-number">1.1.</span> <span class="nav-text">ZFiles apk</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ManifestGenerationExtension-register"><span class="nav-number">1.1.1.</span> <span class="nav-text">ManifestGenerationExtension register</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SignatureExtension-register"><span class="nav-number">1.1.2.</span> <span class="nav-text">SignatureExtension register</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IncrementalPackager-updateFiles"><span class="nav-number">1.2.</span> <span class="nav-text">IncrementalPackager updateFiles</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Air</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://yunair.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://air.com/2017/09/30/AndroidPlugin源码解析(八)/';
+          this.page.identifier = '2017/09/30/AndroidPlugin源码解析(八)/';
+          this.page.title = 'AndroidPlugin源码解析(八)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://yunair.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
