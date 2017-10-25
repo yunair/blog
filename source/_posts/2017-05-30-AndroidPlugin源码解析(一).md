@@ -28,7 +28,7 @@ public void apply(@NonNull Project project) {
     // This is needed for the prepare task on the consuming project.
     project.getTasks().create("assembleDefault");
 }
-~~~ 
+~~~
 
 接下来我们一步步的跟进:
 
