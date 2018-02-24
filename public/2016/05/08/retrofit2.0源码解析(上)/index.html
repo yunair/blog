@@ -107,7 +107,7 @@
 <meta property="og:url" content="http://air.com/2016/05/08/retrofit2.0源码解析(上)/index.html">
 <meta property="og:site_name" content="Air Little Place">
 <meta property="og:description" content="前言​    千呼万唤始出来的Retrofit2.0正式版终于出来了，首先我们来看一看 Jake Wharton 的演讲，这次演讲主要讲了1.0版本的好处和问题，以及2.0版本的优势，对于好处，我们在1.0版本的使用过程中相信都已体会过了，在这里我就不重新提了，那么这第一篇就主要讲一下1.0版本的问题，和2.0在设计上是如何解决这些问题的。至于源代码的分析和对比将会放在第二篇中讲。 Retrofi">
-<meta property="og:updated_time" content="2017-10-07T13:01:39.000Z">
+<meta property="og:updated_time" content="2018-02-24T09:17:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Retrofit2源码分析-(上)">
 <meta name="twitter:description" content="前言​    千呼万唤始出来的Retrofit2.0正式版终于出来了，首先我们来看一看 Jake Wharton 的演讲，这次演讲主要讲了1.0版本的好处和问题，以及2.0版本的优势，对于好处，我们在1.0版本的使用过程中相信都已体会过了，在这里我就不重新提了，那么这第一篇就主要讲一下1.0版本的问题，和2.0在设计上是如何解决这些问题的。至于源代码的分析和对比将会放在第二篇中讲。 Retrofi">
@@ -401,7 +401,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GitHubService</span> </span>&#123;</div><div class="line">	<span class="meta">@GET</span>(<span class="string">"/repos/&#123;owner&#125;/&#123;repo&#125;/contributors"</span>)</div><div class="line">	Call&lt;List&lt;Contributor&gt;&gt; repoContributors(</div><div class="line">  	<span class="meta">@Path</span>(<span class="string">"owner"</span>) String owner,</div><div class="line">  	<span class="meta">@Path</span>(<span class="string">"repo"</span>) String repo);</div><div class="line">	&#125;</div><div class="line">	Call&lt;List&lt;Contributor&gt;&gt; call =</div><div class="line">	gitHubService.repoContributors(<span class="string">"square"</span>, <span class="string">"retrofit"</span>)</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
 <h4 id="参数化Response对象"><a href="#参数化Response对象" class="headerlink" title="参数化Response对象"></a>参数化Response对象</h4><p>通过Response，你可以获取请求的元数据，包括 response code, message, 和headers。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Response</span>&lt;<span class="title">T</span>&gt; </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">int</span> <span class="title">code</span><span class="params">()</span></span>;</div><div class="line">  <span class="function">String <span class="title">message</span><span class="params">()</span></span>;</div><div class="line">  <span class="function">Headers <span class="title">headers</span><span class="params">()</span></span>;</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">isSuccess</span><span class="params">()</span></span>; </div><div class="line">  <span class="function">T <span class="title">body</span><span class="params">()</span></span>;</div><div class="line">  <span class="function">ResponseBody <span class="title">errorBody</span><span class="params">()</span></span>; </div><div class="line">  com.squareup.okhttp.<span class="function">Response <span class="title">raw</span><span class="params">()</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>只有响应的Http code是200的情况下才会进行反序列化。如果响            应没有成功，我们不知道响应是什么类型。将回返回<code>ResponseBody</code>类型，它将Content-Type，Content-Length，还有原始的body进行了封装，让你可以对响应做出想要的处理。</p>
+<p>只有响应的Http code是200的情况下才会进行反序列化。如果响应没有成功，我们不知道响应是什么类型。将回返回<code>ResponseBody</code>类型，它将Content-Type，Content-Length，还有原始的body进行了封装，让你可以对响应做出想要的处理。</p>
 <h4 id="动态URL参数"><a href="#动态URL参数" class="headerlink" title="动态URL参数"></a>动态URL参数</h4><p>有这样一种情况，请求列表的时候通常都要给服务端传入page，告诉服务端你要第几页数据，如果服务端将page相关的信息放在了响应头中，比如下一页page是什么，总共有几页等等，甚至服务端返回你接下来需要请求的URL。例如Github的API，Retrofit1很难处理这种情况。我们有一个新的<code>@Url</code>注解，允许你在参数中传入Url。如下所示:</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@GET</span></div><div class="line">Call&lt;List&lt;Contributor&gt;&gt; repoContributorsPaginate(</div><div class="line">      <span class="meta">@Url</span> String url);</div></pre></td></tr></table></figure>
 <h4 id="多样的，高效的Converters"><a href="#多样的，高效的Converters" class="headerlink" title="多样的，高效的Converters"></a>多样的，高效的Converters</h4><p>Retrofit1有一个Converter的问题，当然，对于大多数人来说这都不算是问题，但对于一个库来说，它就成了问题。考虑下面一种场景，服务端有两套API，只是返回值的类型不同，比如一个返回json，一个返回xml，可能是如下的url:</p>
@@ -554,7 +554,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -567,7 +567,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -636,7 +636,7 @@
         <div class="copyright" >
   
   &copy;  2015 - 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
