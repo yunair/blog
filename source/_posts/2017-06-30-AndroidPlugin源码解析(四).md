@@ -401,9 +401,9 @@ public Optional<XmlDocument> merge(
 看代码中的注释，应该大概能了解函数的含义。
 </br>
 
-这样，整个Manifest的merge过程就讲完了.下一篇，我们来研究`createGenerateResValuesTask`和`createMergeResourcesTask`的过程.
+这样，整个Manifest的merge过程就讲完了.下一篇，我们来研究`createGenerateResValuesTask`,`createMergeResourcesTask`和`createMergeAssetsTask`的过程.
 
 如果大家有不懂，欢迎通过留言和邮件进行交流。
 
 
-[1]: [https://developer.android.com/studio/build/manifest-merge.html]
+[1]: https://developer.android.com/studio/build/manifest-merge.html

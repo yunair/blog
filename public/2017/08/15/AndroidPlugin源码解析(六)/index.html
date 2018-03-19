@@ -107,7 +107,7 @@
 <meta property="og:url" content="http://air.com/2017/08/15/AndroidPlugin源码解析(六)/index.html">
 <meta property="og:site_name" content="Air Little Place">
 <meta property="og:description" content="上篇提到，我们这篇研究的是接下来三个过程, 分别是:  createBuildConfigTask createApkProcessResTask createProcessJavaResTasks  接下来，我们一个一个来看 createBuildConfigTask这个task实际执行如下方法: 1234567891011121314151617181920212223242526272829">
-<meta property="og:updated_time" content="2017-10-08T01:43:56.000Z">
+<meta property="og:updated_time" content="2018-03-19T07:29:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AndroidPlugin源码解析(六)">
 <meta name="twitter:description" content="上篇提到，我们这篇研究的是接下来三个过程, 分别是:  createBuildConfigTask createApkProcessResTask createProcessJavaResTasks  接下来，我们一个一个来看 createBuildConfigTask这个task实际执行如下方法: 1234567891011121314151617181920212223242526272829">
@@ -452,7 +452,7 @@
 <p>但是有几种情况会出现Java资源：</p>
 <p>比如，使用RxJava的时候，使用okhttp的时候，这些库都带着Java的资源；还有Java Doc， LICENSE之类的资源。</p>
 <p>这里的资源根据你在packageOptions{}中设置的选项，最后merge成一个jar包或者一个文件夹，文件夹的情况我没见到过，这里就不分析了。</p>
-<p>Jar包的路径为<code>build/intermediates/transforms/mergeJavaRes/${buildType}/jars/${TypeValue}/${ScopesValue}/main.jar</code></p>
+<p>Jar包的路径为:<br><code>build/intermediates/transforms/mergeJavaRes/${buildType}/jars/${TypeValue}/${ScopesValue}/main.jar</code></p>
 <p>至于TypeValue和ScopesValue，这其实是<code>QualifiedContent</code>内部的<code>DefaultContentType</code>和<code>Scope</code>两个枚举类的value值。</p>
 <p>这里就是<code>Transform Api</code>的一些用法，看这个代码可以学习<code>Transform Api</code>，对于写<code>Gradle plugin</code>很有用。<br><br></p>
 <p>好了，这里的处理过程不是重点，我们了解生成什么就可以了，所以，ProcessJavaResTasks到这里就结束了。</p>

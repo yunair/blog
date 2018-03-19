@@ -254,7 +254,8 @@ public void createProcessJavaResTasks(
 
 这里的资源根据你在packageOptions{}中设置的选项，最后merge成一个jar包或者一个文件夹，文件夹的情况我没见到过，这里就不分析了。
 
-Jar包的路径为`build/intermediates/transforms/mergeJavaRes/${buildType}/jars/${TypeValue}/${ScopesValue}/main.jar`
+Jar包的路径为:
+`build/intermediates/transforms/mergeJavaRes/${buildType}/jars/${TypeValue}/${ScopesValue}/main.jar`
 
 至于TypeValue和ScopesValue，这其实是`QualifiedContent`内部的`DefaultContentType`和`Scope`两个枚举类的value值。
 

@@ -107,7 +107,7 @@
 <meta property="og:url" content="http://air.com/2017/09/10/AndroidPlugin源码解析(七)/index.html">
 <meta property="og:site_name" content="Air Little Place">
 <meta property="og:description" content="忽视了Aidl, Shader, Ndk, Jni, Jack, DataBinding, StripNativeLibrary, Split, InstantRun, Lint这些Task之后，我们就只剩下面三个重要的Task了：  createJavacTask(tasks, variantScope); createPostCompilationTasks(tasks, variantSco">
-<meta property="og:updated_time" content="2017-10-08T03:13:56.000Z">
+<meta property="og:updated_time" content="2018-03-19T07:33:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AndroidPlugin源码解析(七)">
 <meta name="twitter:description" content="忽视了Aidl, Shader, Ndk, Jni, Jack, DataBinding, StripNativeLibrary, Split, InstantRun, Lint这些Task之后，我们就只剩下面三个重要的Task了：  createJavacTask(tasks, variantScope); createPostCompilationTasks(tasks, variantSco">
@@ -394,8 +394,7 @@
 <ul>
 <li>createJavacTask(tasks, variantScope);</li>
 <li>createPostCompilationTasks(tasks, variantScope);</li>
-<li>createPackagingTask(tasks, variantScope, true /<em>publishApk</em>/,<pre><code>fullBuildInfoGeneratorTask);
-</code></pre></li>
+<li>createPackagingTask(tasks, variantScope, true /<em>publishApk</em>/, fullBuildInfoGeneratorTask);</li>
 </ul>
 <p>这篇文章我们来分析前面两个Task</p>
 <h3 id="createJavacTask"><a href="#createJavacTask" class="headerlink" title="createJavacTask"></a>createJavacTask</h3><p>这个Task的方法为:</p>
@@ -414,7 +413,7 @@
 <p>还有，如果你想使用暴露隐藏方法的<code>android.jar</code>，替换对应<code>compileSdkVersion</code>的<code>android.jar</code>即可。具体路径在<code>${sdkVersion}/platforms/android-${compileSdkVersion}</code>。<br><br></p>
 <p>往下继续看代码，可以看到一个叫做<code>processorPath</code>的列表，<code>processorPath</code>这个列表是怎么来的呢？就是我们在<code>build.gradle</code>里面<code>dependencies</code>里面声明的<code>annotationProcessor</code>。</p>
 <p>假设你的项目里有<code>butterknife</code>之类的东东，所以这个列表不会为空，所以会为javac添加如下参数<code>-processorpath ${processorPath}</code>,</p>
-<p>继续看，发现又添加了具体的apt处理类的参数, <code>-processor ${processorClassName1,processorClassName2...}</code>，</p>
+<p>继续看，发现又添加了具体的apt处理类的参数:<br> <code>-processor ${processorClassName1,processorClassName2...}</code>，</p>
 <p>最后，如果你为某个<code>annotationProcessor</code>设置了参数，就会为javac再加入新的参数<code>-A ${key}=${value}</code>,</p>
 <p>为某个<code>annotationProcessor</code>设置了参数的方式为(以<code>butterknife</code>为例)</p>
 <p><code>javaCompileOptions.annotationProcessorOptions.arguments[&#39;butterknife.debuggable&#39;] = &#39;false&#39;</code></p>
@@ -422,10 +421,9 @@
 <p>最后，要在执行javac之前做一些处理，我们可以看到，就是创建<code>build/generated/source/apt</code>这个文件夹，如果存在，删除之后再重新创建。创建好此文件夹后，就可以加入<code>-s ${annotationProcessorOutputDir}</code>,</p>
 <p>这样，无论是需要apt生成的代码，还是最终需要javac生成的代码都配置好了，如果想知道每个参数的具体含义，请参考<code>javac -help</code><br><br></p>
 <p>剩下的就是调用javac命令来执行了，因为这个属于<code>JavaCompile</code> task，这个Task是gradle自带的，所以到这里<code>createJavacTask</code>方法就结束了。<br><br></p>
-<p>剩下的就是调用javac命令来执行了，因为这个属于<code>JavaCompile</code> task，这个Task是gradle自带的，所以到这里<code>createJavacTask</code>方法就结束了。<br><br></p>
 <p>接下来这个Task并不是打包过程的一步，放在这里是因为如果你需要打包一个Jar包给别人，那么这里是最合适执行此Task的地方，因为这个Task要依赖<code>javacTask</code>。</p>
 <p>这个Task的任务就是把Javac生成的那些文件，R文件，BuildConfig文件打包，所以这里也没有写出这个Task的名字，就直接创建了，</p>
-<p>创建代码为<code>getAndroidTasks().create(tasks, new AndroidJarTask.JarClassesConfigAction(variantScope));</code>，</p>
+<p>创建代码为:<br><code>getAndroidTasks().create(tasks, new AndroidJarTask.JarClassesConfigAction(variantScope));</code>，</p>
 <p>这个Task执行结果放在<code>build/intermediates/packaged/${buildType}/classes.jar</code>。</p>
 <p>不过，这里只是包含当前lib生成的class文件，不包含依赖的class文件。<br><br></p>
 <p>了解到这里，我们就可以继续往下看了。</p>
@@ -475,7 +473,7 @@
 <li>MultiDexTransform</li>
 </ul>
 <p>虽然如此，但是<code>JarMergingTransform</code>本身的任务很简单，就是将class文件打成jar包，这里就不仔细分析了，</p>
-<p>熟悉<code>Transform Api</code>的话很容易就能看懂，这个的最终结果是<code>build/intermediates/transform/${outputTypes}/${scope}/combined.jar</code>这样一个jar包，对着结果来理解应该会更容易了。</p>
+<p>熟悉<code>Transform Api</code>的话很容易就能看懂，<br>这个的最终结果是:<br><code>build/intermediates/transform/${outputTypes}/${scope}/combined.jar</code>这样一个jar包，<br>对着结果来理解应该会更容易了。</p>
 <p>好了，这样我们来仔细关注<code>MultiDexTransform</code>，我们来看看它的<code>transform</code>方法</p>
 <h4 id="MultiDexTransform-transform"><a href="#MultiDexTransform-transform" class="headerlink" title="MultiDexTransform transform"></a>MultiDexTransform transform</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//校验referencedInputs只能有一个，要么是jar，要么是directory</span></div><div class="line">File input = verifyInputs(invocation.getReferencedInputs()); </div><div class="line">shrinkWithProguard(input);</div><div class="line">computeList(input);</div></pre></td></tr></table></figure>
 <p>看起来就三个方法，第一个方法就是做一个校验；但是后面两个比较复杂，我们仔细研究一下。</p>
@@ -483,9 +481,9 @@
 <p>看到最后一个方法<code>runProguard()</code>，先猜测一下这个方法前面的过程是给<code>Proguard</code>设置参数的过程。经过分析，确实如此。</p>
 <p>这里就点几点，<code>userMainDexKeepProguard != null</code>，</p>
 <p>这个在什么情况下不为null呢？在<code>bulidType</code>中设置过这个参数<code>multiDexKeepProguard</code>的情况下不为<code>null</code>。</p>
-<p>作为<code>librayJar</code>的参数到底是哪个Jar呢？ 是 <code>build-tools/${buildToolsVersion}/lib/shrinkedAndroid.jar</code>这个Jar。</p>
-<p><code>outJar</code>的最终位置在哪里呢？ 在<code>build/intermediates/multi-dex/${buildType}/componentClasses.jar</code>，</p>
-<p>好了，最后一个这个配置的输出是在<code>build/intermediates/multi-dex/${buildType}/components.flags</code>，看这个文件的内容，就是这里的配置。</p>
+<p>作为<code>librayJar</code>的参数到底是哪个Jar呢？<br>是 <code>build-tools/${buildToolsVersion}/lib/shrinkedAndroid.jar</code>这个Jar。</p>
+<p><code>outJar</code>的最终位置在哪里呢？<br>在<code>build/intermediates/multi-dex/${buildType}/componentClasses.jar</code>，</p>
+<p>好了，最后一个这个配置的输出是在<br><code>build/intermediates/multi-dex/${buildType}/components.flags</code>，<br>看这个文件的内容，就是这里的配置。</p>
 <p>配置完成了，接下来就是跑<code>Proguard</code>输出<code>componentClasses.jar</code>的过程，这个过程是<code>Proguard</code>的任务，就不在我们流程之中了。详细了解这个过程，请参考<code>Proguard</code>的源码。</p>
 <p>然后我们就可以看<code>transform</code>方法内的第三个方法了。</p>
 <h5 id="MultiDexTransform-computeList"><a href="#MultiDexTransform-computeList" class="headerlink" title="MultiDexTransform computeList"></a>MultiDexTransform computeList</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">computeList</span><span class="params">(File _allClassesJarFile)</span> <span class="keyword">throws</span> ProcessException, IOException </span>&#123;</div><div class="line">    <span class="comment">// manifest components plus immediate dependencies must be in the main dex.</span></div><div class="line">    Set&lt;String&gt; mainDexClasses = callDx(</div><div class="line">            _allClassesJarFile,</div><div class="line">            variantScope.getProguardComponentsJarFile());</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (userMainDexKeepFile != <span class="keyword">null</span>) &#123;</div><div class="line">        mainDexClasses = ImmutableSet.&lt;String&gt;builder()</div><div class="line">                .addAll(mainDexClasses)</div><div class="line">                .addAll(Files.readLines(userMainDexKeepFile, Charsets.UTF_8))</div><div class="line">                .build();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    String fileContent = Joiner.on(System.getProperty(<span class="string">"line.separator"</span>)).join(mainDexClasses);</div><div class="line"></div><div class="line">    Files.write(fileContent, mainDexListFile, Charsets.UTF_8);</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>

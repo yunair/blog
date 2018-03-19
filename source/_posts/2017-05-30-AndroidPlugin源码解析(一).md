@@ -156,10 +156,10 @@ AndroidBuilder对象主要的几个参数的含义从我在代码中添加的注
 最后讲一下`TaskExecutionGraphListener`这个接口。
 官方文档是这样说的: 
 
->
-    A TaskExecutionGraphListener is notified when the TaskExecutionGraph has been populated. 
-    You can use this interface in your build file to perform some action based on the contents of the graph, 
-    before any tasks are actually executed.
+> 
+A TaskExecutionGraphListener is notified when the TaskExecutionGraph has been populated. 
+You can use this interface in your build file to perform some action based on the contents of the graph, 
+before any tasks are actually executed.
 
 大概翻译一下，当Gradle将所有task的关系图填充之后，该接口会被调用。
 你可以在build文件中使用这个接口，在任意task真正执行之前，去完成一些基于task关系图内容的任务。

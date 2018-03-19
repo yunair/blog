@@ -107,7 +107,7 @@
 <meta property="og:url" content="http://air.com/2017/06/30/AndroidPlugin源码解析(四)/index.html">
 <meta property="og:site_name" content="Air Little Place">
 <meta property="og:description" content="接下来几篇就来解析上篇提到的代码。 一个一个Task来看 createAnchorTasks这个方法创建的Tasks就如名字所示，是Anchor Tasks（即所谓的锚点任务）。在这里不做仔细的解析。 具体就是创建一些preXXXBuild任务，generateXXXResources/Assets/Sources任务以及compileXXXSources任务。 createCheckManife">
-<meta property="og:updated_time" content="2017-10-08T01:41:47.000Z">
+<meta property="og:updated_time" content="2018-03-19T07:25:15.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AndroidPlugin源码解析(四)">
 <meta name="twitter:description" content="接下来几篇就来解析上篇提到的代码。 一个一个Task来看 createAnchorTasks这个方法创建的Tasks就如名字所示，是Anchor Tasks（即所谓的锚点任务）。在这里不做仔细的解析。 具体就是创建一些preXXXBuild任务，generateXXXResources/Assets/Sources任务以及compileXXXSources任务。 createCheckManife">
@@ -438,11 +438,11 @@
 <li><code>xmlDocumentOptional = merge(xmlDocumentOptional, loadedMainManifestInfo, mergingReportBuilder);</code></li>
 <li><code>xmlDocumentOptional = merge(xmlDocumentOptional, libraryDocument, mergingReportBuilder);</code></li>
 </ol>
-<p>这就是官方文档<a href="[https://developer.android.com/studio/build/manifest-merge.html]">Merge Multiple Manifest Files</a>所提到的顺序的原因。</p>
+<p>这就是官方文档<a href="https://developer.android.com/studio/build/manifest-merge.html" target="_blank" rel="external">Merge Multiple Manifest Files</a>所提到的顺序的原因。</p>
 <p>接下来，我们再看if的内容:</p>
 <h5 id="XmlDocument-merge"><a href="#XmlDocument-merge" class="headerlink" title="XmlDocument merge"></a>XmlDocument merge</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Optional&lt;XmlDocument&gt; <span class="title">merge</span><span class="params">(</span></span></div><div class="line">        @NonNull XmlDocument lowerPriorityDocument,</div><div class="line">        @NonNull MergingReport.Builder mergingReportBuilder) &#123;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (getFileType() == Type.MAIN) &#123;</div><div class="line">        mergingReportBuilder.getActionRecorder().recordDefaultNodeAction(getRootNode());</div><div class="line">    &#125;</div><div class="line">    <span class="comment">// 处理Manifest里面的tools定义的操作,这里根据tools定义的不同操作，进行不同的处理</span></div><div class="line">    getRootNode().mergeWithLowerPriorityNode(</div><div class="line">            lowerPriorityDocument.getRootNode(), mergingReportBuilder);</div><div class="line">    <span class="comment">// 进行一些隐含的检测，比如uses-sdk, targetSdk，library和main的必须相同</span></div><div class="line">    <span class="comment">// 某些权限申请了一个必须申请另一个，比如WRITE_EXTERNAL_STORAGE</span></div><div class="line">    addImplicitElements(lowerPriorityDocument, mergingReportBuilder);</div><div class="line"></div><div class="line">    <span class="comment">// force re-parsing as new nodes may have appeared.</span></div><div class="line">    <span class="keyword">return</span> mergingReportBuilder.hasErrors()</div><div class="line">            ? Optional.&lt;XmlDocument&gt;absent()</div><div class="line">            : Optional.of(reparse());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>看代码中的注释，应该大概能了解函数的含义。<br><br></p>
-<p>这样，整个Manifest的merge过程就讲完了.下一篇，我们来研究<code>createGenerateResValuesTask</code>和<code>createMergeResourcesTask</code>的过程.</p>
+<p>这样，整个Manifest的merge过程就讲完了.下一篇，我们来研究<code>createGenerateResValuesTask</code>,<code>createMergeResourcesTask</code>和<code>createMergeAssetsTask</code>的过程.</p>
 <p>如果大家有不懂，欢迎通过留言和邮件进行交流。</p>
 
       

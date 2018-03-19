@@ -8,8 +8,7 @@ tags: AndroidPlugin
 
 - createJavacTask(tasks, variantScope);
 - createPostCompilationTasks(tasks, variantScope);
-- createPackagingTask(tasks, variantScope, true /*publishApk*/,
-        fullBuildInfoGeneratorTask);
+- createPackagingTask(tasks, variantScope, true /*publishApk*/, fullBuildInfoGeneratorTask);
 
 这篇文章我们来分析前面两个Task
 
@@ -163,7 +162,8 @@ javacTask.getOptions().setBootClasspath(
 
 假设你的项目里有`butterknife`之类的东东，所以这个列表不会为空，所以会为javac添加如下参数`-processorpath ${processorPath}`,
 
-继续看，发现又添加了具体的apt处理类的参数, `-processor ${processorClassName1,processorClassName2...}`，
+继续看，发现又添加了具体的apt处理类的参数:
+ `-processor ${processorClassName1,processorClassName2...}`，
 
 最后，如果你为某个`annotationProcessor`设置了参数，就会为javac再加入新的参数`-A ${key}=${value}`,
 
@@ -182,14 +182,12 @@ javacTask.getOptions().setBootClasspath(
 剩下的就是调用javac命令来执行了，因为这个属于`JavaCompile` task，这个Task是gradle自带的，所以到这里`createJavacTask`方法就结束了。
 </br>
 
-剩下的就是调用javac命令来执行了，因为这个属于`JavaCompile` task，这个Task是gradle自带的，所以到这里`createJavacTask`方法就结束了。
-</br>
-
 接下来这个Task并不是打包过程的一步，放在这里是因为如果你需要打包一个Jar包给别人，那么这里是最合适执行此Task的地方，因为这个Task要依赖`javacTask`。
 
 这个Task的任务就是把Javac生成的那些文件，R文件，BuildConfig文件打包，所以这里也没有写出这个Task的名字，就直接创建了，
 
-创建代码为`getAndroidTasks().create(tasks, new AndroidJarTask.JarClassesConfigAction(variantScope));`，
+创建代码为:
+`getAndroidTasks().create(tasks, new AndroidJarTask.JarClassesConfigAction(variantScope));`，
 
 这个Task执行结果放在`build/intermediates/packaged/${buildType}/classes.jar`。
 
@@ -529,7 +527,10 @@ if (isMultiDexEnabled && isLegacyMultiDexMode) {
 
 虽然如此，但是`JarMergingTransform`本身的任务很简单，就是将class文件打成jar包，这里就不仔细分析了，
 
-熟悉`Transform Api`的话很容易就能看懂，这个的最终结果是`build/intermediates/transform/${outputTypes}/${scope}/combined.jar`这样一个jar包，对着结果来理解应该会更容易了。
+熟悉`Transform Api`的话很容易就能看懂，
+这个的最终结果是:
+`build/intermediates/transform/${outputTypes}/${scope}/combined.jar`这样一个jar包，
+对着结果来理解应该会更容易了。
 
 
 好了，这样我们来仔细关注`MultiDexTransform`，我们来看看它的`transform`方法
@@ -592,11 +593,15 @@ private void shrinkWithProguard(@NonNull File input) throws IOException, ParseEx
 
 这个在什么情况下不为null呢？在`bulidType`中设置过这个参数`multiDexKeepProguard`的情况下不为`null`。
 
-作为`librayJar`的参数到底是哪个Jar呢？ 是 `build-tools/${buildToolsVersion}/lib/shrinkedAndroid.jar`这个Jar。
+作为`librayJar`的参数到底是哪个Jar呢？
+是 `build-tools/${buildToolsVersion}/lib/shrinkedAndroid.jar`这个Jar。
 
-`outJar`的最终位置在哪里呢？ 在`build/intermediates/multi-dex/${buildType}/componentClasses.jar`，
+`outJar`的最终位置在哪里呢？ 
+在`build/intermediates/multi-dex/${buildType}/componentClasses.jar`，
 
-好了，最后一个这个配置的输出是在`build/intermediates/multi-dex/${buildType}/components.flags`，看这个文件的内容，就是这里的配置。
+好了，最后一个这个配置的输出是在
+`build/intermediates/multi-dex/${buildType}/components.flags`，
+看这个文件的内容，就是这里的配置。
 
 配置完成了，接下来就是跑`Proguard`输出`componentClasses.jar`的过程，这个过程是`Proguard`的任务，就不在我们流程之中了。详细了解这个过程，请参考`Proguard`的源码。
 

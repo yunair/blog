@@ -5,7 +5,7 @@ tags: AndroidPlugin
 ---
 
 
-上篇提到，我们这篇研究的是接下来两个过程, 分别是:
+上篇提到，我们这篇研究的是如下过程, 分别是:
 
 - createGenerateResValuesTask
 - createMergeResourcesTask
@@ -113,7 +113,9 @@ public void generate() throws IOException, ParserConfigurationException {
 }
 ~~~
 
-这里就是在gradle的buildType中定义的resValue，最终会在`build/generated/res/resValues/${buildTypes}/values`目录下生成`generated.xml`文件，
+
+这里就是在gradle的buildType中定义的resValue，
+最终会在`build/generated/res/resValues/${buildTypes}/values`目录下生成`generated.xml`文件，
 
 这样，在buildType中定义的resValue就可以在代码中使用了。我在这里通常就是定义一些string，没用过其他resValue类型，所以这里就不详细分析了。
 
