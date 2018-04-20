@@ -107,7 +107,7 @@
 <meta property="og:url" content="http://air.com/2018/02/24/App启动流程/index.html">
 <meta property="og:site_name" content="Air Little Place">
 <meta property="og:description" content="前言作为Android用户，我们会点击桌面图标，然后一个app就启动了了，在这个过程中到底发生了什么呢？换句话说Android app是怎么启动的呢？如果和我有一样的好奇，我们来一起走进代码的细节中了解一下。 桌面app我们平时都不会管Framework层，自然也不会去写桌面app。那我给大家看一看系统带的桌面Activity是怎么启动我们的Activity的. 1234567Intent int">
-<meta property="og:updated_time" content="2018-02-24T09:39:32.000Z">
+<meta property="og:updated_time" content="2018-03-22T09:51:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="App启动流程">
 <meta name="twitter:description" content="前言作为Android用户，我们会点击桌面图标，然后一个app就启动了了，在这个过程中到底发生了什么呢？换句话说Android app是怎么启动的呢？如果和我有一样的好奇，我们来一起走进代码的细节中了解一下。 桌面app我们平时都不会管Framework层，自然也不会去写桌面app。那我给大家看一看系统带的桌面Activity是怎么启动我们的Activity的. 1234567Intent int">
@@ -415,7 +415,7 @@
 <p>后面是一个方法: <code>ActivityThread</code>的<code>bindApplication</code>方法。</p>
 <p>在忽视<code>bindApplication</code>方法中的一些初始化之后，就做了一件事，给<code>H</code>这个<code>Handler</code>发送<code>BIND_APPLICATION</code>消息，然后<code>H</code>会调用<code>handleBindApplication</code>方法。</p>
 <h3 id="ActivityThread-handleBindApplication"><a href="#ActivityThread-handleBindApplication" class="headerlink" title="ActivityThread handleBindApplication"></a>ActivityThread handleBindApplication</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// If the app is Honeycomb MR1 or earlier, switch its AsyncTask</span></div><div class="line"><span class="comment">// implementation to use the pool executor.  Normally, we use the</span></div><div class="line"><span class="comment">// serialized executor as the default. This has to happen in the</span></div><div class="line"><span class="comment">// main thread so the main looper is set right.</span></div><div class="line"><span class="keyword">if</span> (data.appInfo.targetSdkVersion &lt;= android.os.Build.VERSION_CODES.HONEYCOMB_MR1) &#123;</div><div class="line">    AsyncTask.setDefaultExecutor(AsyncTask.THREAD_POOL_EXECUTOR);</div><div class="line">&#125;</div><div class="line">Message.updateCheckRecycle(data.appInfo.targetSdkVersion);</div><div class="line"></div><div class="line"><span class="keyword">if</span> ((data.appInfo.flags&amp;ApplicationInfo.FLAG_LARGE_HEAP) != <span class="number">0</span>) &#123;</div><div class="line">    dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="comment">// Small heap, clamp to the current growth limit and let the heap release</span></div><div class="line">    <span class="comment">// pages after the growth limit to the non growth limit capacity. b/18387825</span></div><div class="line">    dalvik.system.VMRuntime.getRuntime().clampGrowthLimit();</div><div class="line">&#125;   </div><div class="line"></div><div class="line"> <span class="comment">// a restricted environment with the base application class.</span></div><div class="line">Application app = data.info.makeApplication(data.restrictedBackupMode, <span class="keyword">null</span>);</div><div class="line"></div><div class="line">List&lt;ProviderInfo&gt; providers = data.providers;</div><div class="line"><span class="keyword">if</span> (providers != <span class="keyword">null</span>) &#123;</div><div class="line">    installContentProviders(app, providers);</div><div class="line">    <span class="comment">// For process that contains content providers, we want to</span></div><div class="line">    <span class="comment">// ensure that the JIT is enabled "at some point".</span></div><div class="line">    mH.sendEmptyMessageDelayed(H.ENABLE_JIT, <span class="number">10</span>*<span class="number">1000</span>);</div><div class="line">&#125;</div><div class="line"> </div><div class="line">mInstrumentation.callApplicationOnCreate(app);</div></pre></td></tr></table></figure>
-<p>这里放这些代码，但是只会详解生成<code>Application</code>的函数<code>data.info.makeApplication(data.restrictedBackupMode, null)</code>。</p>
+<p>这里放这些代码，但是只会详解生成<code>Application</code>的函数:<br><code>data.info.makeApplication(data.restrictedBackupMode, null)</code>。</p>
 <p>剩下的我们就提以下几点:</p>
 <ul>
 <li><code>AsyncTask</code>在不同的<code>targetSdkVersion</code>中行为不同，为什么呢，不止AsyncTask代码的不同，还因为这里修改了线程池的实现。</li>
@@ -505,9 +505,6 @@
 
 
           </div>
-          
-
-
           
   <div class="comments" id="comments">
     

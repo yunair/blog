@@ -151,8 +151,8 @@ social_icons:
   # Icon Mappings.
   # KeyMapsToSocialItemKey: NameOfTheIconFromFontAwesome
   GitHub: github
-  Twitter: twitter
-  Weibo: weibo
+  # Twitter: twitter
+  # Weibo: weibo
 
 
 # Sidebar Avatar
@@ -318,10 +318,10 @@ disqus:
 #gentie_productKey:
 
 # changyan
-changyan:
-  enable: false
-  appid:
-  appkey:
+# changyan:
+  # enable: false
+  # appid:
+  # appkey:
 
 # Support for youyan comments system.
 # You can get your uid from http://www.uyan.cc
