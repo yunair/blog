@@ -3,16 +3,16 @@ language: go
 git:
   depth: 1
 install: go get -v github.com/gohugoio/hugo
-script: hugo
+script: hugo && ls public
 deploy:
   provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
   on:
     branch: master
-  local-dir: public
+  local_dir: public
   repo: yunair/yunair.github.io
   fqdn: blog.airzone.world
-  target-branch: master
+  target_branch: master
   email: airzhaoyn@gmail.com
   name: yunair
