@@ -6,13 +6,13 @@ install: go get -v github.com/gohugoio/hugo
 script: hugo
 deploy:
   provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
   on:
     branch: master
-  local_dir: public
+  local-dir: public
   repo: yunair/yunair.github.io
   fqdn: blog.airzone.world
-  target_branch: master
+  target-branch: master
   email: airzhaoyn@gmail.com
   name: yunair
