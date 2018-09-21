@@ -2,9 +2,11 @@ sudo: false
 language: go
 git:
   depth: 1
+  submodules: false
+before_install:
+  - git submodule update --init --recursive
 install: go get -v github.com/gohugoio/hugo
-script:
-- hugo -d public
+script: hugo
 deploy:
   provider: pages
   skip_cleanup: true
